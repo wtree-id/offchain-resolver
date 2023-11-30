@@ -116,3 +116,4 @@ cache
 !.yarn/versions
 
 secret.yaml
+.yarn

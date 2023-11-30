@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import ethers from 'ethers';
+import { ethers } from 'ethers';
 
 const program = new Command();
 program
@@ -14,7 +14,7 @@ const options = program.opts();
 const ensAddress = options.registry;
 const chainId = parseInt(options.chainId);
 const chainName = options.chainName;
-const provider = new ethers.providers.JsonRpcProvider(options.provider, {
+const provider = new ethers.JsonRpcProvider(options.provider, {
   chainId,
   name: chainName,
   ensAddress,

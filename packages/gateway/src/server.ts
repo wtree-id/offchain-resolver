@@ -1,10 +1,10 @@
-import { Server } from '@chainlink/ccip-read-server';
-import { ethers, BytesLike } from 'ethers';
-import { hexConcat, Result } from 'ethers/lib/utils';
+import { Server } from './ccip-server';
+import { ethers, BytesLike, Result, concat } from 'ethers';
 import { ETH_COIN_TYPE } from './utils';
 import { abi as IResolverService_abi } from '@ensdomains/offchain-resolver-contracts/artifacts/contracts/OffchainResolver.sol/IResolverService.json';
 import { abi as Resolver_abi } from '@ensdomains/ens-contracts/artifacts/contracts/resolvers/Resolver.sol/Resolver.json';
-const Resolver = new ethers.utils.Interface(Resolver_abi);
+
+const ResolverInterface = new ethers.Interface(Resolver_abi);
 
 interface DatabaseResult {
   result: any[];
@@ -27,11 +27,11 @@ export interface Database {
   ): PromiseOrResult<{ contenthash: string; ttl: number }>;
 }
 
-function decodeDnsName(dnsname: Buffer) {
+function decodeDnsName(dnsname: Uint8Array) {
   const labels = [];
   let idx = 0;
   while (true) {
-    const len = dnsname.readUInt8(idx);
+    const len = dnsname[idx];
     if (len === 0) break;
     labels.push(dnsname.slice(idx + 1, idx + len + 1).toString('utf8'));
     idx += len + 1;
@@ -70,13 +70,13 @@ async function query(
   data: string
 ): Promise<{ result: BytesLike; validUntil: number }> {
   // Parse the data nested inside the second argument to `resolve`
-  const { signature, args } = Resolver.parseTransaction({ data });
+  const { signature, args } = ResolverInterface.parseTransaction({ data });
 
-  if (ethers.utils.nameprep(name) !== name) {
+  if (ethers.ensNormalize(name) !== name) {
     throw new Error('Name must be normalised');
   }
 
-  if (ethers.utils.namehash(name) !== args[0]) {
+  if (ethers.namehash(name) !== args[0]) {
     throw new Error('Name does not match namehash');
   }
 
@@ -87,12 +87,12 @@ async function query(
 
   const { result, ttl } = await handler(db, name, args.slice(1));
   return {
-    result: Resolver.encodeFunctionResult(signature, result),
+    result: ResolverInterface.encodeFunctionResult(signature, result),
     validUntil: Math.floor(Date.now() / 1000 + ttl),
   };
 }
 
-export function makeServer(signer: ethers.utils.SigningKey, db: Database) {
+export function makeServer(signer: ethers.SigningKey, db: Database) {
   const server = new Server();
   server.add(IResolverService_abi, [
     {
@@ -103,18 +103,22 @@ export function makeServer(signer: ethers.utils.SigningKey, db: Database) {
         const { result, validUntil } = await query(db, name, data);
 
         // Hash and sign the response
-        let messageHash = ethers.utils.solidityKeccak256(
+        let messageHash = ethers.solidityPackedKeccak256(
           ['bytes', 'address', 'uint64', 'bytes32', 'bytes32'],
           [
             '0x1900',
             request?.to,
             validUntil,
-            ethers.utils.keccak256(request?.data || '0x'),
-            ethers.utils.keccak256(result),
+            ethers.keccak256(request?.data || '0x'),
+            ethers.keccak256(result),
           ]
         );
-        const sig = signer.signDigest(messageHash);
-        const sigData = hexConcat([sig.r, sig._vs]);
+        const sig = signer.sign(messageHash);
+        const sigData = concat([
+          sig.r,
+          sig.s,
+          ethers.getBytes(sig.v.toString()),
+        ]);
         return [result, validUntil, sigData];
       },
     },
@@ -122,10 +126,6 @@ export function makeServer(signer: ethers.utils.SigningKey, db: Database) {
   return server;
 }
 
-export function makeApp(
-  signer: ethers.utils.SigningKey,
-  path: string,
-  db: Database
-) {
+export function makeApp(signer: ethers.SigningKey, path: string, db: Database) {
   return makeServer(signer, db).makeApp(path);
 }

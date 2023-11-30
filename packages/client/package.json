@@ -46,15 +46,15 @@
     }
   ],
   "devDependencies": {
-    "@size-limit/preset-small-lib": "^7.0.5",
-    "husky": "^7.0.4",
-    "size-limit": "^7.0.5",
+    "@size-limit/preset-small-lib": "^11.0.0",
+    "husky": "^8.0.3",
+    "size-limit": "^11.0.0",
     "tsdx": "^0.14.1",
-    "tslib": "^2.3.1",
-    "typescript": "^4.5.4"
+    "tslib": "^2.6.2",
+    "typescript": "^5.3.2"
   },
   "dependencies": {
-    "commander": "^8.3.0",
-    "ethers": "^5.7.2"
+    "commander": "^11.1.0",
+    "ethers": "^6.9.0"
   }
 }

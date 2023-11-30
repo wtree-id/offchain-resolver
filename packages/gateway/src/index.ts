@@ -16,12 +16,12 @@ program.parse(process.argv);
 const options = program.opts();
 let privateKey = options.privateKey;
 if (privateKey.startsWith('@')) {
-  privateKey = ethers.utils.arrayify(
+  privateKey = ethers.toBeArray(
     readFileSync(privateKey.slice(1), { encoding: 'utf-8' })
   );
 }
-const address = ethers.utils.computeAddress(privateKey);
-const signer = new ethers.utils.SigningKey(privateKey);
+const address = ethers.computeAddress(privateKey);
+const signer = new ethers.SigningKey(privateKey);
 const db = JSONDatabase.fromFilename(options.data, parseInt(options.ttl));
 const app = makeApp(signer, '/', db);
 console.log(`Serving on port ${options.port} with signing address ${address}`);
