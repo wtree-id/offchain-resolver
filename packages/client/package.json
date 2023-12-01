@@ -1,4 +1,17 @@
 {
+  "name": "@ensdomains/offchain-resolver-client",
+  "author": "Nick Johnson",
+  "module": "dist/client.esm.js",
+  "size-limit": [
+    {
+      "path": "dist/client.cjs.production.min.js",
+      "limit": "10 KB"
+    },
+    {
+      "path": "dist/client.esm.js",
+      "limit": "10 KB"
+    }
+  ],
   "version": "0.2.1",
   "license": "MIT",
   "main": "dist/index.js",
@@ -12,9 +25,8 @@
   },
   "scripts": {
     "start": "node dist/index.js",
-    "build": "tsdx build",
-    "lint": "tsdx lint",
-    "prepare": "tsdx build",
+    "build": "tsc -p ./tsconfig.json",
+    "prepare": "npm run build",
     "size": "size-limit",
     "analyze": "size-limit --why",
     "clean": "rm -fr node_modules dist",
@@ -32,25 +44,10 @@
     "singleQuote": true,
     "trailingComma": "es5"
   },
-  "name": "@ensdomains/offchain-resolver-client",
-  "author": "Nick Johnson",
-  "module": "dist/client.esm.js",
-  "size-limit": [
-    {
-      "path": "dist/client.cjs.production.min.js",
-      "limit": "10 KB"
-    },
-    {
-      "path": "dist/client.esm.js",
-      "limit": "10 KB"
-    }
-  ],
   "devDependencies": {
     "@size-limit/preset-small-lib": "^11.0.0",
     "husky": "^8.0.3",
     "size-limit": "^11.0.0",
-    "tsdx": "^0.14.1",
-    "tslib": "^2.6.2",
     "typescript": "^5.3.2"
   },
   "dependencies": {
