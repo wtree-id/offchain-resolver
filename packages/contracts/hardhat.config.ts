@@ -1,11 +1,8 @@
-// const { task } = require('hardhat/config');
-require("@nomiclabs/hardhat-etherscan")
-require("@nomiclabs/hardhat-ethers")
-require("@nomiclabs/hardhat-waffle")
-require("hardhat-deploy")
-require("hardhat-deploy-ethers")
+import "@nomicfoundation/hardhat-toolbox"
+import type { HardhatUserConfig, HttpNetworkUserConfig } from "hardhat/types";
+import "hardhat-deploy"
 
-real_accounts = undefined
+let real_accounts: string[] = []
 if (process.env.DEPLOYER_KEY && process.env.OWNER_KEY) {
   real_accounts = [process.env.OWNER_KEY, process.env.DEPLOYER_KEY]
 }
@@ -19,8 +16,8 @@ if (process.env.REMOTE_GATEWAY) {
  * @type import('hardhat/config').HardhatUserConfig
  */
 
-module.exports = {
-  solidity: "0.8.10",
+const config: HardhatUserConfig = {
+  solidity: "0.8.23",
   networks: {
     hardhat: {
       throwOnCallFailures: false,
@@ -67,3 +64,5 @@ module.exports = {
     },
   },
 }
+
+export default config
