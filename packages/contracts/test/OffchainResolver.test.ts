@@ -26,7 +26,7 @@ describe("OffchainResolver", function() {
 
     // Encode the outer call to 'resolve'
     const callData = resolver.interface.encodeFunctionData("resolve", [
-      dnsName("test.eth"),
+      ethers.dnsEncode("test.eth"),
       addrData,
     ])
 
@@ -75,10 +75,9 @@ describe("OffchainResolver", function() {
     it("returns a CCIP-read error", async () => {
       const { resolver } = await setupTests()
 
-      await expect(resolver.resolve(dnsName("test.eth"), "0x")).to.be.revertedWithCustomError(
-        resolver,
-        "OffchainLookup"
-      )
+      await expect(
+        resolver.resolve(ethers.dnsEncode("test.eth"), "0x")
+      ).to.be.revertedWithCustomError(resolver, "OffchainLookup")
     })
   })
 
@@ -135,23 +134,3 @@ describe("OffchainResolver", function() {
     })
   })
 })
-
-function dnsName(name: string): string {
-  // strip leading and trailing .
-  const n = name.replace(/^\.|\.$/gm, "")
-
-  var bufLen = n === "" ? 1 : n.length + 2
-  var buf = Buffer.allocUnsafe(bufLen)
-
-  let offset = 0
-  if (n.length) {
-    const list = n.split(".")
-    for (let i = 0; i < list.length; i++) {
-      const len = buf.write(list[i], offset + 1)
-      buf[offset] = len
-      offset += len + 1
-    }
-  }
-  buf[offset++] = 0
-  return "0x" + buf.reduce((output, elem) => output + ("0" + elem.toString(16)).slice(-2), "")
-}

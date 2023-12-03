@@ -89,14 +89,18 @@ export class Server {
     handlers: Array<HandlerDescription>
   ) {
     const abiInterface = toInterface(abi);
-
     for (const handler of handlers) {
       const fn = abiInterface.getFunction(handler.type);
       if (fn === null) {
         throw new Error(`Function ${handler.type} not found in ABI`);
       }
 
-      this.handlers[ethers.Interface.getSighash(fn)] = {
+      const functionSignature = ethers
+        .keccak256(
+          ethers.toUtf8Bytes(ethers.Fragment.from(fn).format('sighash'))
+        )
+        .slice(0, 10);
+      this.handlers[functionSignature] = {
         type: fn,
         func: handler.func,
       };

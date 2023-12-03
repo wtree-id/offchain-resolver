@@ -29,32 +29,6 @@ const TEST_DB = {
   },
 };
 
-function dnsName(name: string) {
-  // strip leading and trailing .
-  const n = name.replace(/^\.|\.$/gm, '');
-
-  var bufLen = n === '' ? 1 : n.length + 2;
-  var buf = Buffer.allocUnsafe(bufLen);
-
-  let offset = 0;
-  if (n.length) {
-    const list = n.split('.');
-    for (let i = 0; i < list.length; i++) {
-      const len = buf.write(list[i], offset + 1);
-      buf[offset] = len;
-      offset += len + 1;
-    }
-  }
-  buf[offset++] = 0;
-  return (
-    '0x' +
-    buf.reduce(
-      (output, elem) => output + ('0' + elem.toString(16)).slice(-2),
-      ''
-    )
-  );
-}
-
 function expandSignature(sig: string) {
   return {
     r: ethers.dataSlice(sig, 0, 32),
@@ -76,7 +50,7 @@ describe('makeServer', () => {
     const innerData = Resolver.encodeFunctionData(fragment, [node, ...args]);
     // Encode the outer call (eg, resolve(name, inner))
     const outerData = IResolverService.encodeFunctionData('resolve', [
-      dnsName(name),
+      ethers.dnsEncode(name),
       innerData,
     ]);
     // Call the server with address and data
@@ -84,6 +58,7 @@ describe('makeServer', () => {
       to: TEST_ADDRESS,
       data: outerData,
     });
+
     // Decode the response from 'resolve'
     const [result, validUntil, sigData] = IResolverService.decodeFunctionResult(
       'resolve',

@@ -27,16 +27,22 @@ export interface Database {
   ): PromiseOrResult<{ contenthash: string; ttl: number }>;
 }
 
-function decodeDnsName(dnsname: Uint8Array) {
-  const labels = [];
+function decodeDnsName(dnsname: Uint8Array): string {
+  const labels: string[] = [];
   let idx = 0;
-  const decoder = new TextDecoder();
+
   while (true) {
     const len = dnsname[idx];
+
     if (len === 0) break;
-    labels.push(decoder.decode(dnsname.slice(idx + 1, idx + len + 1)));
+
+    const labelBytes = dnsname.subarray(idx + 1, idx + len + 1);
+    const label = String.fromCharCode.apply(null, Array.from(labelBytes));
+    labels.push(label);
+
     idx += len + 1;
   }
+
   return labels.join('.');
 }
 
@@ -119,11 +125,7 @@ export function makeServer(signer: ethers.SigningKey, db: Database) {
           ]
         );
         const sig = signer.sign(messageHash);
-        const sigData = concat([
-          sig.r,
-          sig.s,
-          ethers.getBytes(sig.v.toString()),
-        ]);
+        const sigData = concat([sig.r, sig.s, `0x${sig.v.toString(16)}`]);
         return [result, validUntil, sigData];
       },
     },
