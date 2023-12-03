@@ -4,15 +4,14 @@ import { HardhatRuntimeEnvironment } from "hardhat/types"
 const deployFunction: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const {
     deployments: { deploy },
-    getNamedAccounts,
+    ethers,
   } = hre
-  const { deployer } = await getNamedAccounts()
-
+  const signers = await ethers.getSigners()
+  const owner = signers[0].address
   await deploy("ENSRegistry", {
-    from: deployer,
+    from: owner,
     args: [],
     log: true,
-    deterministicDeployment: true,
   })
 }
 

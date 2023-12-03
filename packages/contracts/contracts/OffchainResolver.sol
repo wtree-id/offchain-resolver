@@ -4,6 +4,7 @@ pragma solidity ^0.8.4;
 import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "./IExtendedResolver.sol";
 import "./SignatureVerifier.sol";
+import "hardhat/console.sol";
 
 interface IResolverService {
     function resolve(
@@ -59,19 +60,23 @@ contract OffchainResolver is ERC165, IExtendedResolver {
      * Resolves a name, as specified by ENSIP 10.
      * @param name The DNS-encoded name to resolve.
      * @param data The ABI encoded data for the underlying resolution function (Eg, addr(bytes32), text(bytes32,string), etc).
-     * @return The return data, ABI encoded identically to the underlying function.
+     * @return result The return data, ABI encoded identically to the underlying function.
      */
     function resolve(
         bytes calldata name,
         bytes calldata data
     ) external view override returns (bytes memory) {
+        console.log("entered resolve");
         bytes memory callData = abi.encodeWithSelector(
             IResolverService.resolve.selector,
             name,
             data
         );
+        console.log("made callData");
         string[] memory urls = new string[](1);
+        console.log("initialized urls array");
         urls[0] = url;
+        console.log("set url");
         revert OffchainLookup(
             address(this),
             urls,

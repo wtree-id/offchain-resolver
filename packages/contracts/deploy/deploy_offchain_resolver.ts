@@ -5,21 +5,31 @@ const deploy: DeployFunction = async ({
   getNamedAccounts,
   deployments,
   network,
+  ethers,
 }: HardhatRuntimeEnvironment) => {
   const { deploy } = deployments
-  const { deployer, signer } = await getNamedAccounts()
+  const { deployer } = await getNamedAccounts()
+
+  let contractDeployer = deployer
+  if (!contractDeployer && !network.tags.test) {
+    throw new Error("deployer is not set")
+  } else {
+    const signers = await ethers.getSigners()
+    contractDeployer = signers[0].address
+  }
+
   if (!network.config.gatewayurl) {
     throw "gatewayurl is missing on hardhat.config.js"
   }
 
   await deploy("OffchainResolver", {
-    from: deployer,
-    args: [network.config.gatewayurl, [signer]],
+    from: contractDeployer,
+    args: [network.config.gatewayurl, [contractDeployer]],
     log: true,
     deterministicDeployment: true,
   })
 }
 
-deploy.tags = ["test", "demo"]
+deploy.tags = ["demo", "test"]
 
 export default deploy

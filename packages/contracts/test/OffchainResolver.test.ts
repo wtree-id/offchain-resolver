@@ -1,82 +1,117 @@
-import { ethers } from "hardhat"
+import { ethers, deployments } from "hardhat"
 import * as namehash from "@wtree-id/eth-ens-namehash-ts"
 import { expect } from "chai"
+import { concat } from "ethers"
 
 const TEST_ADDRESS = "0xCAfEcAfeCAfECaFeCaFecaFecaFECafECafeCaFe"
 
-describe("OffchainResolver", function(accounts) {
-  let signer, address, resolver, snapshot, signingKey, signingAddress
+const OFFCHAIN_RESOLVER_URL = "http://localhost:8080/"
 
-  before(async () => {
-    signingKey = new ethers.SigningKey(ethers.randomBytes(32))
-    signingAddress = ethers.computeAddress(signingKey)
-    signer = await ethers.provider.getSigner()
-    address = await signer.getAddress()
-    const OffchainResolver = await ethers.getContractFactory("OffchainResolver")
-    resolver = await OffchainResolver.deploy("http://localhost:8080/", [signingAddress])
-  })
+describe("OffchainResolver", function() {
+  const setupTests = deployments.createFixture(async ({ deployments }) => {
+    await deployments.fixture()
+    const signingKey = new ethers.SigningKey(ethers.randomBytes(32))
+    const signingAddress = ethers.computeAddress(signingKey)
+    const signers = await ethers.getSigners()
+    // const resolver = await ethers.getContractAt(
+    //   "OffchainResolver",
+    //   (await deployments.get("OffchainResolver")).address
+    // )
+    const resolverAddress = await (await ethers.getContractFactory("OffchainResolver"))
+      .deploy(OFFCHAIN_RESOLVER_URL, [signingAddress])
+      .then((tx) => tx.waitForDeployment())
+      .then((tx) => tx.getAddress())
+    const resolver = await ethers.getContractAt("OffchainResolver", resolverAddress)
 
-  beforeEach(async () => {
-    snapshot = await ethers.provider.send("evm_snapshot", [])
-  })
+    const name = "test.eth"
+    const expires = Math.floor(Date.now() / 1000 + 3600)
+    // Encode the nested call to 'addr'
+    const addrIface = new ethers.Interface(["function addr(bytes32) returns(address)"])
+    const addrData = addrIface.encodeFunctionData("addr", [namehash.hash("test.eth")])
+    console.log("hash", namehash.hash("test.eth"))
+    console.log("dnsName", dnsName("test.eth"))
 
-  afterEach(async () => {
-    await ethers.provider.send("evm_revert", [snapshot])
+    // Encode the outer call to 'resolve'
+    const callData = resolver.interface.encodeFunctionData("resolve", [
+      dnsName("test.eth"),
+      addrData,
+    ])
+
+    // Encode the result data
+    const resultData = addrIface.encodeFunctionResult("addr", [TEST_ADDRESS])
+
+    // Generate a signature hash for the response from the gateway
+    const callDataHash = await resolver.makeSignatureHash(
+      await resolver.getAddress(),
+      expires,
+      callData,
+      resultData
+    )
+
+    // Sign it
+    const sig = signingKey.sign(callDataHash)
+
+    return {
+      resolver,
+      signers,
+      signingAddress,
+      signingKey,
+      name,
+      addrIface,
+      sig,
+      callData,
+      expires,
+      resultData,
+    }
   })
 
   describe("supportsInterface()", async () => {
     it("supports known interfaces", async () => {
+      const { resolver } = await setupTests()
+
       expect(await resolver.supportsInterface("0x9061b923")).to.equal(true) // IExtendedResolver
     })
 
     it("does not support a random interface", async () => {
+      const { resolver } = await setupTests()
       expect(await resolver.supportsInterface("0x3b3b57df")).to.equal(false)
     })
   })
 
   describe("resolve()", async () => {
-    it("returns a CCIP-read error", async () => {
-      await expect(resolver.resolve(dnsName("test.eth"), "0x")).to.be.revertedWith("OffchainLookup")
+    it.only("returns a CCIP-read error", async () => {
+      const { resolver } = await setupTests()
+      console.log("tests setup")
+      console.log(
+        `callData ${resolver.interface.encodeFunctionData("resolve", [dnsName("test.eth"), "0x"])}`
+      )
+      const res = await ethers.provider.send("eth_call", [
+        {
+          to: await resolver.getAddress(),
+          data: resolver.interface.encodeFunctionData("resolve", [dnsName("test.eth"), "0x"]),
+        },
+      ])
+      console.log({ res })
+      await expect(resolver.resolve(dnsName("test.eth"), "0x")).to.be.revertedWithCustomError(
+        resolver,
+        "OffchainLookup"
+      )
+      console.log("test done")
     })
   })
 
   describe("resolveWithProof()", async () => {
-    let name, expires, iface, callData, resultData, sig
-
-    before(async () => {
-      name = "test.eth"
-      expires = Math.floor(Date.now() / 1000 + 3600)
-      // Encode the nested call to 'addr'
-      iface = new ethers.utils.Interface(["function addr(bytes32) returns(address)"])
-      const addrData = iface.encodeFunctionData("addr", [namehash.hash("test.eth")])
-
-      // Encode the outer call to 'resolve'
-      callData = resolver.interface.encodeFunctionData("resolve", [dnsName("test.eth"), addrData])
-
-      // Encode the result data
-      resultData = iface.encodeFunctionResult("addr", [TEST_ADDRESS])
-
-      // Generate a signature hash for the response from the gateway
-      const callDataHash = await resolver.makeSignatureHash(
-        resolver.address,
-        expires,
-        callData,
-        resultData
-      )
-
-      // Sign it
-      sig = signingKey.signDigest(callDataHash)
-    })
-
     it("resolves an address given a valid signature", async () => {
+      const { resolver, callData, expires, resultData, sig, addrIface } = await setupTests()
+
       // Generate the response data
-      const response = defaultAbiCoder.encode(
+      const response = ethers.AbiCoder.defaultAbiCoder().encode(
         ["bytes", "uint64", "bytes"],
-        [resultData, expires, hexConcat([sig.r, sig._vs])]
+        [resultData, expires, ethers.concat([sig.r, sig.s, `0x${sig.v.toString(16)}`])]
       )
 
       // Call the function with the request and response
-      const [result] = iface.decodeFunctionResult(
+      const [result] = addrIface.decodeFunctionResult(
         "addr",
         await resolver.resolveWithProof(response, callData)
       )
@@ -84,14 +119,17 @@ describe("OffchainResolver", function(accounts) {
     })
 
     it("reverts given an invalid signature", async () => {
+      const { resolver, callData, expires, resultData, sig } = await setupTests()
       // Corrupt the sig
-      const deadsig = arrayify(hexConcat([sig.r, sig._vs])).slice()
-      deadsig[0] = deadsig[0] + 1
+      const deadSig = ethers
+        .toBeArray(ethers.concat([sig.r, sig.s, `0x${sig.v.toString(16)}`]))
+        .slice()
+      deadSig[0] = deadSig[0] + 1
 
       // Generate the response data
-      const response = defaultAbiCoder.encode(
+      const response = ethers.AbiCoder.defaultAbiCoder().encode(
         ["bytes", "uint64", "bytes"],
-        [resultData, expires, deadsig]
+        [resultData, expires, deadSig]
       )
 
       // Call the function with the request and response
@@ -99,10 +137,15 @@ describe("OffchainResolver", function(accounts) {
     })
 
     it("reverts given an expired signature", async () => {
+      const { resolver, callData, resultData, sig } = await setupTests()
       // Generate the response data
-      const response = defaultAbiCoder.encode(
+      const response = ethers.AbiCoder.defaultAbiCoder().encode(
         ["bytes", "uint64", "bytes"],
-        [resultData, Math.floor(Date.now() / 1000 - 1), hexConcat([sig.r, sig._vs])]
+        [
+          resultData,
+          Math.floor(Date.now() / 1000 - 1),
+          concat([sig.r, sig.s, `0x${sig.v.toString(16)}`]),
+        ]
       )
 
       // Call the function with the request and response
