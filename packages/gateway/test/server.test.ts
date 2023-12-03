@@ -5,8 +5,8 @@ import { abi as IResolverService_abi } from '@ensdomains/offchain-resolver-contr
 import { abi as Resolver_abi } from '@ensdomains/ens-contracts/artifacts/contracts/resolvers/Resolver.sol/Resolver.json';
 import { ETH_COIN_TYPE } from '../src/utils';
 
-const IResolverService = new ethers.utils.Interface(IResolverService_abi);
-const Resolver = new ethers.utils.Interface(Resolver_abi);
+const IResolverService = new ethers.Interface(IResolverService_abi);
+const Resolver = new ethers.Interface(Resolver_abi);
 
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 const TEST_ADDRESS = '0xCAfEcAfeCAfECaFeCaFecaFecaFECafECafeCaFe';
@@ -57,20 +57,21 @@ function dnsName(name: string) {
 
 function expandSignature(sig: string) {
   return {
-    r: ethers.utils.hexDataSlice(sig, 0, 32),
-    _vs: ethers.utils.hexDataSlice(sig, 32),
+    r: ethers.dataSlice(sig, 0, 32),
+    s: ethers.dataSlice(sig, 32, 64),
+    v: ethers.dataSlice(sig, 64, 65),
   };
 }
 
 describe('makeServer', () => {
-  const key = new ethers.utils.SigningKey(ethers.utils.randomBytes(32));
-  const signingAddress = ethers.utils.computeAddress(key.privateKey);
+  const key = new ethers.SigningKey(ethers.randomBytes(32));
+  const signingAddress = ethers.computeAddress(key.privateKey);
   const db = new JSONDatabase(TEST_DB, 300);
   const server = makeServer(key, db);
 
   async function makeCall(fragment: string, name: string, ...args: any[]) {
     // Hash the name
-    const node = ethers.utils.namehash(name);
+    const node = ethers.namehash(name);
     // Encode the inner call (eg, addr(namehash))
     const innerData = Resolver.encodeFunctionData(fragment, [node, ...args]);
     // Encode the outer call (eg, resolve(name, inner))
@@ -89,19 +90,19 @@ describe('makeServer', () => {
       body.data
     );
     // Check the signature
-    let messageHash = ethers.utils.solidityKeccak256(
+    let messageHash = ethers.solidityPackedKeccak256(
       ['bytes', 'address', 'uint64', 'bytes32', 'bytes32'],
       [
         '0x1900',
         TEST_ADDRESS,
         validUntil,
-        ethers.utils.keccak256(outerData || '0x'),
-        ethers.utils.keccak256(result),
+        ethers.keccak256(outerData || '0x'),
+        ethers.keccak256(result),
       ]
     );
-    expect(
-      ethers.utils.recoverAddress(messageHash, expandSignature(sigData))
-    ).toBe(signingAddress);
+    expect(ethers.recoverAddress(messageHash, expandSignature(sigData))).toBe(
+      signingAddress
+    );
     return { status, result };
   }
 

@@ -1,14 +1,7 @@
 import cors from 'cors';
-import { ethers, BytesLike } from 'ethers';
-import {
-  Fragment,
-  FunctionFragment,
-  Interface,
-  JsonFragment,
-} from '@ethersproject/abi';
+import { ethers, BytesLike, isAddress, isBytesLike } from 'ethers';
 import { hexlify } from '@ethersproject/bytes';
 import express from 'express';
-import { isAddress, isBytesLike } from 'ethers/lib/utils';
 
 export interface RPCCall {
   to: BytesLike;
@@ -21,22 +14,25 @@ export interface RPCResponse {
 }
 
 export type HandlerFunc = (
-  args: ethers.utils.Result,
+  args: ethers.Result,
   req: RPCCall
 ) => Promise<Array<any>> | Array<any>;
 
 interface Handler {
-  type: FunctionFragment;
+  type: ethers.FunctionFragment;
   func: HandlerFunc;
 }
 
 function toInterface(
-  abi: string | readonly (string | Fragment | JsonFragment)[] | Interface
+  abi:
+    | string
+    | readonly (string | ethers.Fragment | ethers.JsonFragment)[]
+    | ethers.Interface
 ) {
-  if (Interface.isInterface(abi)) {
+  if (abi instanceof ethers.Interface) {
     return abi;
   }
-  return new Interface(abi);
+  return new ethers.Interface(abi);
 }
 
 export interface HandlerDescription {
@@ -86,15 +82,21 @@ export class Server {
    * @param handlers An array of handlers to register against this interface.
    */
   add(
-    abi: string | readonly (string | Fragment | JsonFragment)[] | Interface,
+    abi:
+      | string
+      | readonly (string | ethers.Fragment | ethers.JsonFragment)[]
+      | ethers.Interface,
     handlers: Array<HandlerDescription>
   ) {
     const abiInterface = toInterface(abi);
 
     for (const handler of handlers) {
       const fn = abiInterface.getFunction(handler.type);
+      if (fn === null) {
+        throw new Error(`Function ${handler.type} not found in ABI`);
+      }
 
-      this.handlers[Interface.getSighash(fn)] = {
+      this.handlers[ethers.Interface.getSighash(fn)] = {
         type: fn,
         func: handler.func,
       };
@@ -170,7 +172,7 @@ export class Server {
     }
 
     // Decode function arguments
-    const args = ethers.utils.defaultAbiCoder.decode(
+    const args = ethers.AbiCoder.defaultAbiCoder().decode(
       handler.type.inputs,
       '0x' + calldata.slice(10)
     );
@@ -184,7 +186,10 @@ export class Server {
       body: {
         data: handler.type.outputs
           ? hexlify(
-              ethers.utils.defaultAbiCoder.encode(handler.type.outputs, result)
+              ethers.AbiCoder.defaultAbiCoder().encode(
+                handler.type.outputs,
+                result
+              )
             )
           : '0x',
       },

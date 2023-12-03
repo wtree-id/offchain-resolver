@@ -70,7 +70,7 @@ describe('makeServer', () => {
 
   async function makeCall(fragment: string, name: string, ...args: any[]) {
     // Hash the name
-    const node = ethers.utils.namehash(name);
+    const node = ethers.namehash(name);
     // Encode the inner call (eg, addr(namehash))
     const innerData = Resolver.encodeFunctionData(fragment, [node, ...args]);
     // Encode the outer call (eg, resolve(name, inner))

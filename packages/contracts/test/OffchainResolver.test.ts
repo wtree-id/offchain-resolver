@@ -1,5 +1,4 @@
 import { ethers, deployments } from "hardhat"
-import * as namehash from "@wtree-id/eth-ens-namehash-ts"
 import { expect } from "chai"
 import { concat } from "ethers"
 
@@ -13,10 +12,6 @@ describe("OffchainResolver", function() {
     const signingKey = new ethers.SigningKey(ethers.randomBytes(32))
     const signingAddress = ethers.computeAddress(signingKey)
     const signers = await ethers.getSigners()
-    // const resolver = await ethers.getContractAt(
-    //   "OffchainResolver",
-    //   (await deployments.get("OffchainResolver")).address
-    // )
     const resolverAddress = await (await ethers.getContractFactory("OffchainResolver"))
       .deploy(OFFCHAIN_RESOLVER_URL, [signingAddress])
       .then((tx) => tx.waitForDeployment())
@@ -27,9 +22,7 @@ describe("OffchainResolver", function() {
     const expires = Math.floor(Date.now() / 1000 + 3600)
     // Encode the nested call to 'addr'
     const addrIface = new ethers.Interface(["function addr(bytes32) returns(address)"])
-    const addrData = addrIface.encodeFunctionData("addr", [namehash.hash("test.eth")])
-    console.log("hash", namehash.hash("test.eth"))
-    console.log("dnsName", dnsName("test.eth"))
+    const addrData = addrIface.encodeFunctionData("addr", [ethers.namehash("test.eth")])
 
     // Encode the outer call to 'resolve'
     const callData = resolver.interface.encodeFunctionData("resolve", [
@@ -79,24 +72,13 @@ describe("OffchainResolver", function() {
   })
 
   describe("resolve()", async () => {
-    it.only("returns a CCIP-read error", async () => {
+    it("returns a CCIP-read error", async () => {
       const { resolver } = await setupTests()
-      console.log("tests setup")
-      console.log(
-        `callData ${resolver.interface.encodeFunctionData("resolve", [dnsName("test.eth"), "0x"])}`
-      )
-      const res = await ethers.provider.send("eth_call", [
-        {
-          to: await resolver.getAddress(),
-          data: resolver.interface.encodeFunctionData("resolve", [dnsName("test.eth"), "0x"]),
-        },
-      ])
-      console.log({ res })
+
       await expect(resolver.resolve(dnsName("test.eth"), "0x")).to.be.revertedWithCustomError(
         resolver,
         "OffchainLookup"
       )
-      console.log("test done")
     })
   })
 

@@ -30,10 +30,11 @@ export interface Database {
 function decodeDnsName(dnsname: Uint8Array) {
   const labels = [];
   let idx = 0;
+  const decoder = new TextDecoder();
   while (true) {
     const len = dnsname[idx];
     if (len === 0) break;
-    labels.push(dnsname.slice(idx + 1, idx + len + 1).toString('utf8'));
+    labels.push(decoder.decode(dnsname.slice(idx + 1, idx + len + 1)));
     idx += len + 1;
   }
   return labels.join('.');
@@ -70,7 +71,11 @@ async function query(
   data: string
 ): Promise<{ result: BytesLike; validUntil: number }> {
   // Parse the data nested inside the second argument to `resolve`
-  const { signature, args } = ResolverInterface.parseTransaction({ data });
+  const parsedTx = ResolverInterface.parseTransaction({ data });
+  if (!parsedTx) {
+    throw new Error('Invalid data');
+  }
+  const { signature, args } = parsedTx;
 
   if (ethers.ensNormalize(name) !== name) {
     throw new Error('Name must be normalised');

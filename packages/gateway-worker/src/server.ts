@@ -77,7 +77,7 @@ async function query(
     throw new Error('Name must be normalised');
   }
 
-  if (ethers.utils.namehash(name) !== args[0]) {
+  if (ethers.namehash(name) !== args[0]) {
     throw new Error('Name does not match namehash');
   }
 

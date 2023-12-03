@@ -20,7 +20,6 @@ const config: HardhatUserConfig = {
   solidity: "0.8.23",
   networks: {
     hardhat: {
-      throwOnCallFailures: false,
       gatewayurl: devgatewayurl,
     },
     ropsten: {

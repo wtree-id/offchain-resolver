@@ -258,7 +258,7 @@ describe('End to end test', () => {
   describe('resolve()', () => {
     it('resolves calls to addr(bytes32)', async () => {
       const callData = Resolver.encodeFunctionData('addr(bytes32)', [
-        ethers.utils.namehash('test.eth'),
+        ethers.namehash('test.eth'),
       ]);
       const result = await resolver.resolve(dnsName('test.eth'), callData);
       const resultData = Resolver.decodeFunctionResult('addr(bytes32)', result);
@@ -269,7 +269,7 @@ describe('End to end test', () => {
 
     it('resolves calls to text(bytes32,string)', async () => {
       const callData = Resolver.encodeFunctionData('text(bytes32,string)', [
-        ethers.utils.namehash('test.eth'),
+        ethers.namehash('test.eth'),
         'email',
       ]);
       const result = await resolver.resolve(dnsName('test.eth'), callData);
@@ -281,7 +281,7 @@ describe('End to end test', () => {
     });
     it('resolves calls to contenthash(bytes32)', async () => {
       const callData = Resolver.encodeFunctionData('contenthash(bytes32)', [
-        ethers.utils.namehash('test.eth'),
+        ethers.namehash('test.eth'),
       ]);
       const result = await resolver.resolve(dnsName('test.eth'), callData);
       const resultData = Resolver.decodeFunctionResult(
