@@ -1,27 +1,15 @@
 import { ethers } from "hardhat"
 import * as namehash from "@wtree-id/eth-ens-namehash-ts"
 import { expect } from "chai"
-const { defaultAbiCoder, SigningKey, arrayify, hexConcat } = require("ethers/lib/utils")
 
 const TEST_ADDRESS = "0xCAfEcAfeCAfECaFeCaFecaFecaFECafECafeCaFe"
 
 describe("OffchainResolver", function(accounts) {
   let signer, address, resolver, snapshot, signingKey, signingAddress
 
-  async function fetcher(url, json) {
-    console.log({ url, json })
-    return {
-      jobRunId: "1",
-      statusCode: 200,
-      data: {
-        result: "0x",
-      },
-    }
-  }
-
   before(async () => {
-    signingKey = new SigningKey(ethers.utils.randomBytes(32))
-    signingAddress = ethers.utils.computeAddress(signingKey.privateKey)
+    signingKey = new ethers.SigningKey(ethers.randomBytes(32))
+    signingAddress = ethers.computeAddress(signingKey)
     signer = await ethers.provider.getSigner()
     address = await signer.getAddress()
     const OffchainResolver = await ethers.getContractFactory("OffchainResolver")
@@ -123,7 +111,7 @@ describe("OffchainResolver", function(accounts) {
   })
 })
 
-function dnsName(name) {
+function dnsName(name: string): string {
   // strip leading and trailing .
   const n = name.replace(/^\.|\.$/gm, "")
 

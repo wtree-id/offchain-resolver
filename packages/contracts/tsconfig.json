@@ -1,7 +1,7 @@
 {
   // see https://www.typescriptlang.org/tsconfig to better understand tsconfigs
-  "include": ["src", "types", "deploy"],
-  "files": ["./hardhat.config.ts"],
+  "include": ["src", "types", "deploy", "test"],
+  "files": ["./hardhat.config.ts", "./hardhat-config.d.ts"],
   "compilerOptions": {
     "module": "CommonJS",
     "lib": ["dom", "esnext"],
