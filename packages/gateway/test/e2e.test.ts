@@ -3,7 +3,6 @@ import chai, { expect } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { ethers } from 'ethers';
 import ganache from 'ganache-cli';
-import { JsonRpcSigner, Web3Provider } from '@ethersproject/providers';
 import { FetchJsonResponse } from '@ethersproject/web';
 import { JSONDatabase } from '../src/json';
 import { makeServer } from '../src/server';
@@ -26,15 +25,13 @@ export type Fetch = (
   processFunc?: (value: any, response: FetchJsonResponse) => any
 ) => Promise<any>;
 
-const Resolver = new ethers.utils.Interface(Resolver_abi.abi);
+const Resolver = new ethers.Interface(Resolver_abi.abi);
 
 const TEST_PRIVATE_KEY =
   '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
 const TEST_URL = 'http://localhost:8080/rpc/{sender}/{data}.json';
 
-const CCIP_READ_INTERFACE = new ethers.utils.Interface(
-  OffchainResolver_abi.abi
-);
+const CCIP_READ_INTERFACE = new ethers.Interface(OffchainResolver_abi.abi);
 
 function deploySolidity(data: any, signer: ethers.Signer, ...args: any[]) {
   const factory = ethers.ContractFactory.fromSolidity(data, signer);
@@ -135,23 +132,29 @@ function isRevertError(e: any): e is RevertError {
  * Hack to ensure that revert data gets passed back from test nodes the same way as from real nodes.
  * This middleware catches Ganache's custom revert error and returns it as response data instead.
  */
-class RevertNormalisingMiddleware extends ethers.providers.BaseProvider {
-  readonly parent: ethers.providers.BaseProvider;
+class RevertNormalisingMiddleware extends ethers.JsonRpcApiProvider {
+  readonly parent: ethers.JsonRpcApiProvider;
 
-  constructor(provider: ethers.providers.BaseProvider) {
+  constructor(provider: ethers.JsonRpcApiProvider) {
     super(provider.getNetwork());
     this.parent = provider;
   }
 
-  getSigner(addressOrIndex?: string | number): JsonRpcSigner {
-    return (this.parent as Web3Provider).getSigner(addressOrIndex);
+  getSigner(addressOrIndex?: string | number): Promise<ethers.js> {
+    return (this.parent as ethers.JsonRpcApiProvider).getSigner(addressOrIndex);
   }
 
-  async perform(method: string, params: any): Promise<any> {
+  async _send({
+    method,
+    params,
+  }: {
+    method: string;
+    params: any;
+  }): Promise<any> {
     switch (method) {
       case 'call':
         try {
-          return await this.parent.perform(method, params);
+          return await this.parent.send({ method, params });
         } catch (e) {
           if (isRevertError(e)) {
             const error = e.error as any;
@@ -163,13 +166,13 @@ class RevertNormalisingMiddleware extends ethers.providers.BaseProvider {
           throw e;
         }
       default:
-        const result = await this.parent.perform(method, params);
+        const result = await this.parent._perform(method, params);
         return result;
     }
   }
 
-  detectNetwork(): Promise<ethers.providers.Network> {
-    return this.parent.detectNetwork();
+  detectNetwork(): Promise<ethers.Network> {
+    return this.parent._detectNetwork();
   }
 }
 
@@ -217,8 +220,8 @@ function dnsName(name: string) {
 }
 
 describe('End to end test', () => {
-  const key = new ethers.utils.SigningKey(TEST_PRIVATE_KEY);
-  const signerAddress = ethers.utils.computeAddress(key.privateKey);
+  const key = new ethers.SigningKey(TEST_PRIVATE_KEY);
+  const signerAddress = ethers.computeAddress(key.privateKey);
   const db = new JSONDatabase(TEST_DB, 300);
   const server = makeServer(key, db);
 
@@ -234,8 +237,8 @@ describe('End to end test', () => {
     return ret;
   }
 
-  const baseProvider = new ethers.providers.Web3Provider(ganache.provider());
-  const signer = baseProvider.getSigner();
+  const baseProvider = new ethers.JsonRpcProvider(ganache.provider());
+  const signer = await baseProvider.getSigner();
   const proxyMiddleware = new RevertNormalisingMiddleware(baseProvider);
   const mockProvider = new MockProvider(proxyMiddleware, fetcher);
 
