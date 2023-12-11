@@ -5,7 +5,6 @@ import {
   Interface,
   JsonFragment,
 } from '@ethersproject/abi';
-import { hexlify } from '@ethersproject/bytes';
 import { Router } from 'itty-router';
 import { isAddress, isBytesLike } from 'ethers/lib/utils';
 import { IRequest } from './cors';

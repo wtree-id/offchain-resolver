@@ -17,7 +17,6 @@ import {
   Network,
 } from '@ethersproject/providers';
 import { fetchJson } from '@ethersproject/web';
-import { arrayify, BytesLike, hexlify } from '@ethersproject/bytes';
 chai.use(chaiAsPromised);
 
 export type Fetch = (

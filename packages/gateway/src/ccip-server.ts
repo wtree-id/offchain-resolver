@@ -1,6 +1,5 @@
 import cors from 'cors';
-import { ethers, BytesLike, isAddress, isBytesLike } from 'ethers';
-import { hexlify } from '@ethersproject/bytes';
+import { ethers, BytesLike, isAddress, isBytesLike, hexlify } from 'ethers';
 import express from 'express';
 
 export interface RPCCall {

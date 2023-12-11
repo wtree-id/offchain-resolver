@@ -9,21 +9,7 @@ import { makeServer } from '../src/server';
 import { ETH_COIN_TYPE } from '../src/utils';
 import Resolver_abi from '@ensdomains/ens-contracts/artifacts/contracts/resolvers/Resolver.sol/Resolver.json';
 import OffchainResolver_abi from '@ensdomains/offchain-resolver-contracts/artifacts/contracts/OffchainResolver.sol/OffchainResolver.json';
-import {
-  BaseProvider,
-  BlockTag,
-  TransactionRequest,
-  Network,
-} from '@ethersproject/providers';
-import { fetchJson } from '@ethersproject/web';
-import { arrayify, BytesLike, hexlify } from '@ethersproject/bytes';
 chai.use(chaiAsPromised);
-
-export type Fetch = (
-  url: string,
-  json?: string,
-  processFunc?: (value: any, response: FetchJsonResponse) => any
-) => Promise<any>;
 
 const Resolver = new ethers.Interface(Resolver_abi.abi);
 
@@ -38,15 +24,18 @@ function deploySolidity(data: any, signer: ethers.Signer, ...args: any[]) {
   return factory.deploy(...args);
 }
 
-export class MockProvider extends BaseProvider {
-  readonly parent: BaseProvider;
-  readonly fetcher: Fetch;
+export class MockProvider extends ethers.JsonRpcApiProvider {
+  readonly parent: ethers.JsonRpcApiProvider;
+  readonly fetcher: ethers.FetchRequest;
 
   /**
    * Constructor.
    * @param provider: The Ethers provider to wrap.
    */
-  constructor(provider: BaseProvider, fetcher: Fetch = fetchJson) {
+  constructor(
+    provider: ethers.JsonRpcApiProvider,
+    fetcher: ethers.FetchRequest = ethers.FetchRequest
+  ) {
     super(1337);
     this.parent = provider;
     this.fetcher = fetcher;
@@ -58,16 +47,22 @@ export class MockProvider extends BaseProvider {
         const { result } = await this.handleCall(this, params);
         return result;
       default:
-        return this.parent.perform(method, params);
+        return this.parent.send(method, params);
     }
   }
 
   async handleCall(
     provider: MockProvider,
-    params: { transaction: TransactionRequest; blockTag?: BlockTag }
-  ): Promise<{ transaction: TransactionRequest; result: BytesLike }> {
-    let result = await provider.parent.perform('call', params);
-    let bytes = arrayify(result);
+    params: {
+      transaction: ethers.TransactionRequest;
+      blockTag?: ethers.BlockTag;
+    }
+  ): Promise<{
+    transaction: ethers.TransactionRequest;
+    result: ethers.BytesLike;
+  }> {
+    let result = await provider.parent.send('call', params);
+    let bytes = ethers.getBytes(result);
     const { urls, callData } = CCIP_READ_INTERFACE.decodeErrorResult(
       'OffchainLookup',
       bytes
@@ -88,13 +83,13 @@ export class MockProvider extends BaseProvider {
     fetcher: Fetch,
     urls: string[],
     to: any,
-    callData: BytesLike
-  ): Promise<BytesLike> {
+    callData: ethers.BytesLike
+  ): Promise<ethers.BytesLike> {
     const processFunc = (value: any, response: FetchJsonResponse) => {
       return { body: value, status: response.statusCode };
     };
 
-    const args = { sender: hexlify(to), data: hexlify(callData) };
+    const args = { sender: ethers.hexlify(to), data: ethers.hexlify(callData) };
     const template = urls[0];
     const url = template.replace(
       /\{([^}]*)\}/g,
@@ -108,8 +103,14 @@ export class MockProvider extends BaseProvider {
     return data.body.data;
   }
 
-  detectNetwork(): Promise<Network> {
-    return this.parent.detectNetwork();
+  detectNetwork(): Promise<ethers.Network> {
+    return this.parent._detectNetwork();
+  }
+
+  async _send(
+    payload: ethers.JsonRpcPayload | ethers.JsonRpcPayload[]
+  ): Promise<Array<ethers.JsonRpcResult | ethers.JsonRpcError>> {
+    return this.parent._send(payload);
   }
 }
 
@@ -135,26 +136,23 @@ function isRevertError(e: any): e is RevertError {
 class RevertNormalisingMiddleware extends ethers.JsonRpcApiProvider {
   readonly parent: ethers.JsonRpcApiProvider;
 
-  constructor(provider: ethers.JsonRpcApiProvider) {
-    super(provider.getNetwork());
+  constructor(
+    provider: ethers.JsonRpcApiProvider,
+    network?: ethers.Networkish
+  ) {
+    super(network);
     this.parent = provider;
   }
 
-  getSigner(addressOrIndex?: string | number): Promise<ethers.js> {
+  getSigner(addressOrIndex?: string | number): Promise<ethers.JsonRpcSigner> {
     return (this.parent as ethers.JsonRpcApiProvider).getSigner(addressOrIndex);
   }
 
-  async _send({
-    method,
-    params,
-  }: {
-    method: string;
-    params: any;
-  }): Promise<any> {
+  async send(method: string, params: any): Promise<any> {
     switch (method) {
       case 'call':
         try {
-          return await this.parent.send({ method, params });
+          return await this.parent.send(method, params);
         } catch (e) {
           if (isRevertError(e)) {
             const error = e.error as any;
@@ -166,13 +164,19 @@ class RevertNormalisingMiddleware extends ethers.JsonRpcApiProvider {
           throw e;
         }
       default:
-        const result = await this.parent._perform(method, params);
+        const result = await this.parent.send(method, params);
         return result;
     }
   }
 
   detectNetwork(): Promise<ethers.Network> {
     return this.parent._detectNetwork();
+  }
+
+  async _send(
+    payload: ethers.JsonRpcPayload | ethers.JsonRpcPayload[]
+  ): Promise<Array<ethers.JsonRpcResult | ethers.JsonRpcError>> {
+    return this.parent._send(payload);
   }
 }
 
@@ -219,7 +223,7 @@ function dnsName(name: string) {
   );
 }
 
-describe('End to end test', () => {
+describe('End to end test', async () => {
   const key = new ethers.SigningKey(TEST_PRIVATE_KEY);
   const signerAddress = ethers.computeAddress(key.privateKey);
   const db = new JSONDatabase(TEST_DB, 300);
@@ -282,6 +286,7 @@ describe('End to end test', () => {
       );
       expect(resultData).to.deep.equal([TEST_DB['test.eth'].text['email']]);
     });
+
     it('resolves calls to contenthash(bytes32)', async () => {
       const callData = Resolver.encodeFunctionData('contenthash(bytes32)', [
         ethers.namehash('test.eth'),
