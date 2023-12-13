@@ -97,6 +97,7 @@ async function query(
   }
 
   const { result, ttl } = await handler(db, name, args.slice(1));
+
   return {
     result: ResolverInterface.encodeFunctionResult(signature, result),
     validUntil: Math.floor(Date.now() / 1000 + ttl),

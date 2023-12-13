@@ -13,7 +13,7 @@
   "scripts": {
     "start": "node dist/index.js",
     "build": "tsdx build",
-    "test": "tsdx test",
+    "test": "tsdx test ",
     "lint": "tsdx lint",
     "size": "size-limit",
     "analyze": "size-limit --why",
