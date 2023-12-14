@@ -12,7 +12,7 @@
   },
   "scripts": {
     "start": "node dist/index.js",
-    "build": "tsdx build",
+    "build": "tsc -p ./tsconfig.json",
     "test": "tsdx test ",
     "lint": "tsdx lint",
     "size": "size-limit",
@@ -30,7 +30,7 @@
     "singleQuote": true,
     "trailingComma": "es5"
   },
-  "name": "@ensdomains/offchain-resolver-gateway",
+  "name": "@wtree-id/offchain-resolver-gateway",
   "author": "Nick Johnson",
   "module": "dist/gateway.esm.js",
   "size-limit": [
@@ -58,7 +58,7 @@
     "@chainlink/ccip-read-server": "^0.2.1",
     "@chainlink/ethers-ccip-read-provider": "^0.2.3",
     "@ensdomains/ens-contracts": "^0.0.22",
-    "@ensdomains/offchain-resolver-contracts": "^0.2.1",
+    "@wtree-id/offchain-resolver-contracts": "^0.2.1",
     "commander": "^11.1.0",
     "dotenv": "^16.3.1",
     "ethers": "^6.9.0"

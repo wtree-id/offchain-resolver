@@ -1,11 +1,11 @@
-import { Server } from '@ensdomains/ccip-read-cf-worker';
-import { ethers, BytesLike } from 'ethers';
-import { hexConcat, Result } from 'ethers/lib/utils';
-import { Router } from 'itty-router';
+import { ethers, BytesLike, concat, Result } from 'ethers';
+import { RouterType } from 'itty-router';
 import { ETH_COIN_TYPE } from './utils';
-import { abi as IResolverService_abi } from '@ensdomains/offchain-resolver-contracts/artifacts/contracts/OffchainResolver.sol/IResolverService.json';
+import { abi as IResolverService_abi } from '@wtree-id/offchain-resolver-contracts/artifacts/contracts/OffchainResolver.sol/IResolverService.json';
 import { abi as Resolver_abi } from '@ensdomains/ens-contracts/artifacts/contracts/resolvers/Resolver.sol/Resolver.json';
-const Resolver = new ethers.Interface(Resolver_abi);
+import { Server } from './ccip-server-cf';
+
+const ResolverInterface = new ethers.Interface(Resolver_abi);
 
 interface DatabaseResult {
   result: any[];
@@ -71,9 +71,13 @@ async function query(
   data: string
 ): Promise<{ result: BytesLike; validUntil: number }> {
   // Parse the data nested inside the second argument to `resolve`
-  const { signature, args } = Resolver.parseTransaction({ data });
+  const parsedTx = ResolverInterface.parseTransaction({ data });
+  if (!parsedTx) {
+    throw new Error('Invalid data');
+  }
+  const { signature, args } = parsedTx;
 
-  if (ethers.utils.nameprep(name) !== name) {
+  if (ethers.ensNormalize(name) !== name) {
     throw new Error('Name must be normalised');
   }
 
@@ -89,13 +93,13 @@ async function query(
   const { result, ttl } = await handler(db, name, args.slice(1));
   console.log('result, ttl', result, ttl);
   return {
-    result: Resolver.encodeFunctionResult(signature, result),
+    result: ResolverInterface.encodeFunctionResult(signature, result),
     validUntil: Math.floor(Date.now() / 1000 + ttl),
   };
 }
 
 export function makeServer(
-  signer: ethers.utils.SigningKey,
+  signer: ethers.SigningKey,
   db: Database | Promise<Database>
 ) {
   const server = new Server();
@@ -108,18 +112,18 @@ export function makeServer(
         const { result, validUntil } = await query(await db, name, data);
 
         // Hash and sign the response
-        let messageHash = ethers.utils.solidityKeccak256(
+        let messageHash = ethers.solidityPackedKeccak256(
           ['bytes', 'address', 'uint64', 'bytes32', 'bytes32'],
           [
             '0x1900',
             request?.to,
             validUntil,
-            ethers.utils.keccak256(request?.data || '0x'),
-            ethers.utils.keccak256(result),
+            ethers.keccak256(request?.data || '0x'),
+            ethers.keccak256(result),
           ]
         );
-        const sig = signer.signDigest(messageHash);
-        const sigData = hexConcat([sig.r, sig._vs]);
+        const sig = signer.sign(messageHash);
+        const sigData = concat([sig.r, sig.s, `0x${sig.v.toString(16)}`]);
         return [result, validUntil, sigData];
       },
     },
@@ -128,9 +132,9 @@ export function makeServer(
 }
 
 export function makeApp(
-  signer: ethers.utils.SigningKey,
+  signer: ethers.SigningKey,
   path: string,
   db: Database | Promise<Database>
-): Router {
+): RouterType {
   return makeServer(signer, db).makeApp(path);
 }

@@ -1,12 +1,5 @@
-import { ethers, BytesLike } from 'ethers';
-import {
-  Fragment,
-  FunctionFragment,
-  Interface,
-  JsonFragment,
-} from '@ethersproject/abi';
-import { Router } from 'itty-router';
-import { isAddress, isBytesLike } from 'ethers/lib/utils';
+import { ethers, BytesLike, isBytesLike, isAddress, hexlify } from 'ethers';
+import { Router, RouterType } from 'itty-router';
 import { IRequest } from './cors';
 
 export interface RPCCall {
@@ -20,22 +13,25 @@ export interface RPCResponse {
 }
 
 export type HandlerFunc = (
-  args: ethers.utils.Result,
+  args: ethers.Result,
   req: RPCCall
 ) => Promise<Array<any>> | Array<any>;
 
 interface Handler {
-  type: FunctionFragment;
+  type: ethers.FunctionFragment;
   func: HandlerFunc;
 }
 
 function toInterface(
-  abi: string | readonly (string | Fragment | JsonFragment)[] | Interface
+  abi:
+    | string
+    | readonly (string | ethers.Fragment | ethers.JsonFragment)[]
+    | ethers.Interface
 ) {
-  if (Interface.isInterface(abi)) {
+  if (abi instanceof ethers.Interface) {
     return abi;
   }
-  return new Interface(abi);
+  return new ethers.Interface(abi);
 }
 
 export interface HandlerDescription {
@@ -89,15 +85,26 @@ export class Server {
    * @param handlers An array of handlers to register against this interface.
    */
   add(
-    abi: string | readonly (string | Fragment | JsonFragment)[] | Interface,
+    abi:
+      | string
+      | readonly (string | ethers.Fragment | ethers.JsonFragment)[]
+      | ethers.Interface,
     handlers: Array<HandlerDescription>
   ) {
     const abiInterface = toInterface(abi);
 
     for (const handler of handlers) {
       const fn = abiInterface.getFunction(handler.type);
+      if (fn === null) {
+        throw new Error(`Function ${handler.type} not found in ABI`);
+      }
 
-      this.handlers[Interface.getSighash(fn)] = {
+      const functionSignature = ethers
+        .keccak256(
+          ethers.toUtf8Bytes(ethers.Fragment.from(fn).format('sighash'))
+        )
+        .slice(0, 10);
+      this.handlers[functionSignature] = {
         type: fn,
         func: handler.func,
       };
@@ -123,7 +130,7 @@ export class Server {
    * in a smart contract would be "https://example.com/{sender}/{callData}.json".
    * @returns An `itty-router.Router` object configured to serve as a CCIP read gateway.
    */
-  makeApp(prefix: string): Router {
+  makeApp(prefix: string): RouterType {
     const app = Router();
     app.get(prefix, () => new Response('hey ho!', { status: 200 }));
     /*
@@ -186,7 +193,7 @@ export class Server {
     }
 
     // Decode function arguments
-    const args = ethers.utils.defaultAbiCoder.decode(
+    const args = ethers.AbiCoder.defaultAbiCoder().decode(
       handler.type.inputs,
       '0x' + calldata.slice(10)
     );
@@ -200,7 +207,10 @@ export class Server {
       body: {
         data: handler.type.outputs
           ? hexlify(
-              ethers.utils.defaultAbiCoder.encode(handler.type.outputs, result)
+              ethers.AbiCoder.defaultAbiCoder().encode(
+                handler.type.outputs,
+                result
+              )
             )
           : '0x',
       },

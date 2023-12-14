@@ -1,5 +1,5 @@
 {
-  "name": "@ensdomains/offchain-resolver-client",
+  "name": "@wtree-id/offchain-resolver-client",
   "author": "Nick Johnson",
   "module": "dist/client.esm.js",
   "size-limit": [
