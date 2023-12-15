@@ -1,4 +1,4 @@
-import { makeApp } from './server';
+import { makeRouter } from './server';
 import { ethers } from 'ethers';
 import { JSONDatabase } from './json';
 
@@ -8,9 +8,9 @@ const routeHandler = (env: any) => {
   const address = ethers.computeAddress(privateKey);
   const signer = new ethers.SigningKey(privateKey);
   const db = JSONDatabase.fromKVStore(OFFCHAIN_STORE_DEV, parseInt(OG_TTL));
-  const app = makeApp(signer, '/', db);
+  const router = makeRouter(signer, '/', db);
   console.log(`Serving with signing address ${address}`);
-  return app;
+  return router;
 };
 
 module.exports = {

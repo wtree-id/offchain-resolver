@@ -131,7 +131,7 @@ export function makeServer(
   return server;
 }
 
-export function makeApp(
+export function makeRouter(
   signer: ethers.SigningKey,
   path: string,
   db: Database | Promise<Database>

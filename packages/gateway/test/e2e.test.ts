@@ -6,7 +6,7 @@ import { JSONDatabase } from '../src/json';
 import { makeServer } from '../src/server';
 import { ETH_COIN_TYPE } from '../src/utils';
 import Resolver_abi from '@ensdomains/ens-contracts/artifacts/contracts/resolvers/Resolver.sol/Resolver.json';
-import OffchainResolver_abi from '@ensdomains/offchain-resolver-contracts/artifacts/contracts/OffchainResolver.sol/OffchainResolver.json';
+import OffchainResolver_abi from '@wtree-id/offchain-resolver-contracts/artifacts/contracts/OffchainResolver.sol/OffchainResolver.json';
 import http from 'http';
 chai.use(chaiAsPromised);
 
@@ -38,51 +38,24 @@ const TEST_DB = {
   },
 };
 
-function dnsName(name: string) {
-  // strip leading and trailing .
-  const n = name.replace(/^\.|\.$/gm, '');
-
-  var bufLen = n === '' ? 1 : n.length + 2;
-  var buf = Buffer.allocUnsafe(bufLen);
-
-  let offset = 0;
-  if (n.length) {
-    const list = n.split('.');
-    for (let i = 0; i < list.length; i++) {
-      const len = buf.write(list[i], offset + 1);
-      buf[offset] = len;
-      offset += len + 1;
-    }
-  }
-  buf[offset++] = 0;
-  return (
-    '0x' +
-    buf.reduce(
-      (output, elem) => output + ('0' + elem.toString(16)).slice(-2),
-      ''
-    )
-  );
-}
-
 describe('End to end test', () => {
   let resolver: ethers.Contract;
   let snapshot: number;
   let expressServer: http.Server;
-  let baseProvider: ethers.JsonRpcApiProvider;
+  let provider: ethers.JsonRpcApiProvider;
 
   beforeAll(async () => {
     const key = new ethers.SigningKey(TEST_PRIVATE_KEY);
-    baseProvider = new ethers.JsonRpcProvider('http://127.0.0.1:8545', 1337);
-    const signer = await baseProvider.getSigner();
-    const mockProvider = baseProvider;
+    provider = new ethers.JsonRpcProvider('http://127.0.0.1:8545', 1337);
+    const signer = await provider.getSigner();
     const signerAddress = ethers.computeAddress(key.privateKey);
     // @ts-expect-error fook it
     resolver = (
       await deploySolidity(OffchainResolver_abi, signer, TEST_URL, [
         signerAddress,
       ])
-    ).connect(mockProvider);
-    snapshot = await baseProvider.send('evm_snapshot', []);
+    ).connect(provider);
+    snapshot = await provider.send('evm_snapshot', []);
     const db = new JSONDatabase(TEST_DB, 300);
     const server = makeServer(key, db);
     const app = server.makeApp('/rpc/');
@@ -94,7 +67,7 @@ describe('End to end test', () => {
   });
 
   afterEach(async () => {
-    await baseProvider.send('evm_revert', [snapshot]);
+    await provider.send('evm_revert', [snapshot]);
   });
 
   describe('resolve()', () => {
@@ -102,9 +75,13 @@ describe('End to end test', () => {
       const callData = Resolver.encodeFunctionData('addr(bytes32)', [
         ethers.namehash('test.eth'),
       ]);
-      const result = await resolver.resolve(dnsName('test.eth'), callData, {
-        enableCcipRead: true,
-      });
+      const result = await resolver.resolve(
+        ethers.dnsEncode('test.eth'),
+        callData,
+        {
+          enableCcipRead: true,
+        }
+      );
       const resultData = Resolver.decodeFunctionResult('addr(bytes32)', result);
       expect(resultData).to.deep.equal([
         TEST_DB['test.eth'].addresses[ETH_COIN_TYPE],
@@ -116,9 +93,13 @@ describe('End to end test', () => {
         ethers.namehash('test.eth'),
         'email',
       ]);
-      const result = await resolver.resolve(dnsName('test.eth'), callData, {
-        enableCcipRead: true,
-      });
+      const result = await resolver.resolve(
+        ethers.dnsEncode('test.eth'),
+        callData,
+        {
+          enableCcipRead: true,
+        }
+      );
       const resultData = Resolver.decodeFunctionResult(
         'text(bytes32,string)',
         result
@@ -130,9 +111,13 @@ describe('End to end test', () => {
       const callData = Resolver.encodeFunctionData('contenthash(bytes32)', [
         ethers.namehash('test.eth'),
       ]);
-      const result = await resolver.resolve(dnsName('test.eth'), callData, {
-        enableCcipRead: true,
-      });
+      const result = await resolver.resolve(
+        ethers.dnsEncode('test.eth'),
+        callData,
+        {
+          enableCcipRead: true,
+        }
+      );
       const resultData = Resolver.decodeFunctionResult(
         'contenthash(bytes32)',
         result
