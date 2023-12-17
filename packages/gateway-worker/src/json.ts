@@ -1,3 +1,4 @@
+import fs from 'fs';
 import { Database } from './server';
 
 interface NameData {
@@ -32,6 +33,11 @@ export class JSONDatabase implements Database {
     const data = await store.get('test.eth.json');
     console.log({ data });
     return new JSONDatabase(JSON.parse(data), ttl);
+  }
+
+  static async fromFile(path: string, ttl: number) {
+    const data = JSON.parse(fs.readFileSync(path, { encoding: 'utf8' }));
+    return new JSONDatabase(data, ttl);
   }
 
   addr(name: string, coinType: number) {

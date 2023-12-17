@@ -12,7 +12,7 @@ const Resolver = new ethers.Interface(Resolver_abi.abi);
 
 const TEST_PRIVATE_KEY =
   '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
-const TEST_URL = 'http://localhost:8080/rpc/{sender}/{data}.json';
+const TEST_URL = 'http://localhost:8000/rpc/{sender}/{data}.json';
 
 function deploySolidity(data: any, signer: ethers.Signer, ...args: any[]) {
   const factory = ethers.ContractFactory.fromSolidity(data, signer);
@@ -67,7 +67,8 @@ describe('End to end test', () => {
       ]);
       const result = await resolver.resolve(
         ethers.dnsEncode('test.eth'),
-        callData
+        callData,
+        { enableCcipRead: true }
       );
       const resultData = Resolver.decodeFunctionResult('addr(bytes32)', result);
       expect(resultData).to.deep.equal([
@@ -82,7 +83,8 @@ describe('End to end test', () => {
       ]);
       const result = await resolver.resolve(
         ethers.dnsEncode('test.eth'),
-        callData
+        callData,
+        { enableCcipRead: true }
       );
       const resultData = Resolver.decodeFunctionResult(
         'text(bytes32,string)',
@@ -96,7 +98,8 @@ describe('End to end test', () => {
       ]);
       const result = await resolver.resolve(
         ethers.dnsEncode('test.eth'),
-        callData
+        callData,
+        { enableCcipRead: true }
       );
       const resultData = Resolver.decodeFunctionResult(
         'contenthash(bytes32)',
