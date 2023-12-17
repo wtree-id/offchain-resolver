@@ -11,7 +11,7 @@ kv_namespaces = [
 port = 8000
 
 [build]
-command = "yarn build"
+command = "npm run build"
 
 [vars]
 OG_DATA = "test.eth.json"

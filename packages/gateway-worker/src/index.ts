@@ -13,8 +13,8 @@ const routeHandler = (env: any) => {
   return router;
 };
 
-module.exports = {
-  fetch: function(request: Request, env: any, _context: any) {
+export default {
+  async fetch(request: Request, env: any, _context: any) {
     const router = routeHandler(env);
     return router.handle(request) as any;
   },

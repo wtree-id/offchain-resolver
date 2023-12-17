@@ -29,42 +29,9 @@ const TEST_DB = {
   },
 };
 
-function dnsName(name: string) {
-  // strip leading and trailing .
-  const n = name.replace(/^\.|\.$/gm, '');
-
-  var bufLen = n === '' ? 1 : n.length + 2;
-  var buf = Buffer.allocUnsafe(bufLen);
-
-  let offset = 0;
-  if (n.length) {
-    const list = n.split('.');
-    for (let i = 0; i < list.length; i++) {
-      const len = buf.write(list[i], offset + 1);
-      buf[offset] = len;
-      offset += len + 1;
-    }
-  }
-  buf[offset++] = 0;
-  return (
-    '0x' +
-    buf.reduce(
-      (output, elem) => output + ('0' + elem.toString(16)).slice(-2),
-      ''
-    )
-  );
-}
-
-function expandSignature(sig: string) {
-  return {
-    r: ethers.utils.hexDataSlice(sig, 0, 32),
-    _vs: ethers.utils.hexDataSlice(sig, 32),
-  };
-}
-
 describe('makeServer', () => {
-  const key = new ethers.utils.SigningKey(ethers.utils.randomBytes(32));
-  const signingAddress = ethers.utils.computeAddress(key.privateKey);
+  const key = new ethers.SigningKey(ethers.randomBytes(32));
+  const signingAddress = ethers.computeAddress(key.privateKey);
   const db = new JSONDatabase(TEST_DB, 300);
   const server = makeServer(key, db);
 
@@ -75,7 +42,7 @@ describe('makeServer', () => {
     const innerData = Resolver.encodeFunctionData(fragment, [node, ...args]);
     // Encode the outer call (eg, resolve(name, inner))
     const outerData = IResolverService.encodeFunctionData('resolve', [
-      dnsName(name),
+      ethers.dnsEncode(name),
       innerData,
     ]);
     // Call the server with address and data
@@ -89,19 +56,17 @@ describe('makeServer', () => {
       body.data
     );
     // Check the signature
-    let messageHash = ethers.utils.solidityKeccak256(
+    let messageHash = ethers.solidityPackedKeccak256(
       ['bytes', 'address', 'uint64', 'bytes32', 'bytes32'],
       [
         '0x1900',
         TEST_ADDRESS,
         validUntil,
-        ethers.utils.keccak256(outerData || '0x'),
-        ethers.utils.keccak256(result),
+        ethers.keccak256(outerData || '0x'),
+        ethers.keccak256(result),
       ]
     );
-    expect(
-      ethers.utils.recoverAddress(messageHash, expandSignature(sigData))
-    ).toBe(signingAddress);
+    expect(ethers.recoverAddress(messageHash, sigData)).toBe(signingAddress);
     return { status, result };
   }
 

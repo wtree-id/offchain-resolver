@@ -1,13 +1,10 @@
 /// <reference types="./ganache-cli" />
 import chai, { expect } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
-import { FetchResponse, JsonRpcProvider, ethers } from 'ethers';
-import { JSONDatabase } from '../src/json';
-import { makeServer } from '../src/server';
+import { ethers } from 'ethers';
 import { ETH_COIN_TYPE } from '../src/utils';
 import Resolver_abi from '@ensdomains/ens-contracts/artifacts/contracts/resolvers/Resolver.sol/Resolver.json';
 import OffchainResolver_abi from '@wtree-id/offchain-resolver-contracts/artifacts/contracts/OffchainResolver.sol/OffchainResolver.json';
-import { JsonRpcApiProvider } from 'ethers/src.ts/providers';
 
 chai.use(chaiAsPromised);
 
@@ -57,24 +54,6 @@ describe('End to end test', () => {
       ])
     ).connect(mockProvider);
     snapshot = await baseProvider.send('evm_snapshot', []);
-    const db = new JSONDatabase(TEST_DB, 300);
-    const server = makeServer(key, db);
-    const app = server.makeApp('/rpc/');
-
-    class CustomJsonRpcProvider extends ethers.JsonRpcProvider {
-      async send(
-        method: string,
-        params: Array<any> | Record<string, any>
-      ): Promise<any> {
-        // All requests are over HTTP, so we can just start handling requests
-        // We do this here rather than the constructor so that we don't send any
-        // requests to the network (i.e. eth_chainId) until we absolutely have to.
-        await this._start();
-        console.log({ method, params });
-
-        return await super.send(method, params);
-      }
-    }
   });
 
   afterEach(async () => {

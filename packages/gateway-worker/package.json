@@ -12,7 +12,7 @@
   },
   "scripts": {
     "start": "wrangler dev",
-    "build": "tsdx build",
+    "build": "tsc -p ./tsconfig.json",
     "test": "tsdx test",
     "lint": "tsdx lint",
     "size": "size-limit",
