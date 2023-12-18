@@ -157,7 +157,6 @@ export class Server {
       sender = body.sender;
       callData = body.data;
     }
-
     if (!isAddress(sender) || !isBytesLike(callData)) {
       return new Response('Invalid request format', { status: 400 });
     }

@@ -1,5 +1,6 @@
-import { makeRouter } from './server';
 import { ethers } from 'ethers';
+import { json } from 'itty-router';
+import { makeRouter } from './server';
 import { JSONDatabase } from './json';
 
 const routeHandler = (env: any) => {
@@ -10,10 +11,11 @@ const routeHandler = (env: any) => {
   let db = JSONDatabase.fromKVStore(OFFCHAIN_STORE_DEV, parseInt(OG_TTL));
   // I don't like this, but testing with KV is a pain
   if (USE_TEST_DB) {
-    db = JSONDatabase.fromFile('./test/test.json', parseInt(OG_TTL));
+    console.log('loading a test db');
+    db = JSONDatabase.fromTestFile(parseInt(OG_TTL));
   }
 
-  const router = makeRouter(signer, '/', db);
+  const router = makeRouter(signer, '/rpc/', db);
   console.log(`Serving with signing address ${address}`);
   return router;
 };
@@ -21,6 +23,6 @@ const routeHandler = (env: any) => {
 export default {
   async fetch(request: Request, env: any, _context: any) {
     const router = routeHandler(env);
-    return router.handle(request) as any;
+    return router.handle(request).then(json);
   },
 };

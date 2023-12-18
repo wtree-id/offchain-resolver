@@ -15,15 +15,9 @@
     "build": "tsc -p ./tsconfig.json",
     "test": "tsdx test",
     "test:run": "./scripts/run_tests.sh",
-    "lint": "tsdx lint",
     "size": "size-limit",
     "analyze": "size-limit --why",
     "clean": "rm -fr node_modules dist"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "tsdx lint"
-    }
   },
   "prettier": {
     "printWidth": 80,

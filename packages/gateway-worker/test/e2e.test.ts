@@ -28,7 +28,7 @@ const TEST_DB = {
   },
   'test.eth': {
     addresses: {
-      [ETH_COIN_TYPE]: '0x3456345634563456345634563456345634563456',
+      [ETH_COIN_TYPE]: '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266',
     },
     text: { email: 'test@example.com' },
     contenthash:
@@ -71,7 +71,7 @@ describe('End to end test', () => {
         { enableCcipRead: true }
       );
       const resultData = Resolver.decodeFunctionResult('addr(bytes32)', result);
-      expect(resultData).to.deep.equal([
+      expect(resultData).to.equal([
         TEST_DB['test.eth'].addresses[ETH_COIN_TYPE],
       ]);
     });
@@ -90,7 +90,7 @@ describe('End to end test', () => {
         'text(bytes32,string)',
         result
       );
-      expect(resultData).to.deep.equal([TEST_DB['test.eth'].text['email']]);
+      expect(resultData).to.equal([TEST_DB['test.eth'].text['email']]);
     });
     it('resolves calls to contenthash(bytes32)', async () => {
       const callData = Resolver.encodeFunctionData('contenthash(bytes32)', [
@@ -105,7 +105,7 @@ describe('End to end test', () => {
         'contenthash(bytes32)',
         result
       );
-      expect(resultData).to.deep.equal([TEST_DB['test.eth'].contenthash]);
+      expect(resultData).to.equal([TEST_DB['test.eth'].contenthash]);
     });
   });
 });

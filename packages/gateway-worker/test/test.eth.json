@@ -3,7 +3,8 @@
     "addresses": {
       "60": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
     },
-    "text": { "email": "test@example.com" }
+    "text": { "email": "test@example.com" },
+    "contenthash": "0xe40101fa011b20d1de9994b4d039f6548d191eb26786769f580809256b4685ef316805265ea162"
   },
   "*.test.eth": {
     "addresses": {

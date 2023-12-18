@@ -1,5 +1,6 @@
-import fs from 'fs';
 import { Database } from './server';
+// this is very ugly, but in the worker, we cant access the filesystem
+import TestJSONDB from '../test/test.eth.json';
 
 interface NameData {
   addresses?: { [coinType: number]: string };
@@ -35,8 +36,8 @@ export class JSONDatabase implements Database {
     return new JSONDatabase(JSON.parse(data), ttl);
   }
 
-  static async fromFile(path: string, ttl: number) {
-    const data = JSON.parse(fs.readFileSync(path, { encoding: 'utf8' }));
+  static async fromTestFile(ttl: number) {
+    const data = TestJSONDB;
     return new JSONDatabase(data, ttl);
   }
 
