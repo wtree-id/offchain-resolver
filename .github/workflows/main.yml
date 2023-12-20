@@ -26,4 +26,6 @@ jobs:
         run: npm run build
 
       - name: Test
-        run: npm run test --ci --coverage --maxWorkers=2 --testTimeout=30000
+        run: |
+          npm i -g ganache
+          npm run test --ci --coverage --maxWorkers=2 --testTimeout=30000
