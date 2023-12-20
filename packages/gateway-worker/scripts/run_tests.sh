@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
-npx wrangler dev --var USE_TEST_DB:true & wrangler_pid=$!
+npx wrangler dev --var USE_TEST_DB:true OG_PRIVATE_KEY:0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 & wrangler_pid=$!
 npx ganache -D & ganache_pid=$!
-sleep 5
-npm run test
+sleep 10
+npm run test:run
 
 if [ ${wrangler_pid:-0} -gt 1 ]; then
     echo 'Killing wrangler with $wrangler_pid'

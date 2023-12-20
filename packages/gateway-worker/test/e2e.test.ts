@@ -71,9 +71,9 @@ describe('End to end test', () => {
         { enableCcipRead: true }
       );
       const resultData = Resolver.decodeFunctionResult('addr(bytes32)', result);
-      expect(resultData).to.equal([
-        TEST_DB['test.eth'].addresses[ETH_COIN_TYPE],
-      ]);
+      expect(resultData[0]).to.equal(
+        ethers.getAddress(TEST_DB['test.eth'].addresses[ETH_COIN_TYPE])
+      );
     });
 
     it('resolves calls to text(bytes32,string)', async () => {
@@ -90,7 +90,7 @@ describe('End to end test', () => {
         'text(bytes32,string)',
         result
       );
-      expect(resultData).to.equal([TEST_DB['test.eth'].text['email']]);
+      expect(resultData[0]).to.equal(TEST_DB['test.eth'].text['email']);
     });
     it('resolves calls to contenthash(bytes32)', async () => {
       const callData = Resolver.encodeFunctionData('contenthash(bytes32)', [
@@ -105,7 +105,7 @@ describe('End to end test', () => {
         'contenthash(bytes32)',
         result
       );
-      expect(resultData).to.equal([TEST_DB['test.eth'].contenthash]);
+      expect(resultData[0]).to.equal(TEST_DB['test.eth'].contenthash);
     });
   });
 });

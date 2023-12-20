@@ -13,8 +13,8 @@
   "scripts": {
     "start": "wrangler dev",
     "build": "tsc -p ./tsconfig.json",
-    "test": "tsdx test",
-    "test:run": "./scripts/run_tests.sh",
+    "test:run": "tsdx test",
+    "test": "./scripts/run_tests.sh",
     "size": "size-limit",
     "analyze": "size-limit --why",
     "clean": "rm -fr node_modules dist"
@@ -48,14 +48,14 @@
     "tsdx": "^0.14.1",
     "tslib": "^2.6.2",
     "typescript": "^5.3.3",
-    "wrangler": "^3.21.0"
+    "wrangler": "^3.22.1"
   },
   "dependencies": {
-    "@cloudflare/workers-types": "^4.20231121.0",
+    "@cloudflare/workers-types": "^4.20231218.0",
     "@ensdomains/ens-contracts": "^1.0.0",
     "@wtree-id/offchain-resolver-contracts": "^0.2.1",
     "dotenv": "^16.3.1",
-    "ethers": "^6.9.0",
+    "ethers": "^6.9.1",
     "itty-router": "^4.0.23"
   }
 }
