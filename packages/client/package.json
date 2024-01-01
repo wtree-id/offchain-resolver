@@ -2,16 +2,6 @@
   "name": "@wtree-id/offchain-resolver-client",
   "author": "Nick Johnson",
   "module": "dist/client.esm.js",
-  "size-limit": [
-    {
-      "path": "dist/client.cjs.production.min.js",
-      "limit": "10 KB"
-    },
-    {
-      "path": "dist/client.esm.js",
-      "limit": "10 KB"
-    }
-  ],
   "version": "0.2.1",
   "license": "MIT",
   "main": "dist/index.js",
@@ -27,8 +17,6 @@
     "start": "node dist/index.js",
     "build": "tsc -p ./tsconfig.json",
     "prepare": "npm run build",
-    "size": "size-limit",
-    "analyze": "size-limit --why",
     "clean": "rm -fr node_modules dist",
     "test": "echo No tests"
   },
@@ -40,9 +28,7 @@
     "trailingComma": "es5"
   },
   "devDependencies": {
-    "@size-limit/preset-small-lib": "^11.0.1",
     "husky": "^8.0.3",
-    "size-limit": "^11.0.1",
     "typescript": "^5.3.3"
   },
   "dependencies": {

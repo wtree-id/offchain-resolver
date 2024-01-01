@@ -15,8 +15,6 @@
     "build": "tsc -p ./tsconfig.json",
     "test:run": "tsdx test",
     "test": "./scripts/run_tests.sh",
-    "size": "size-limit",
-    "analyze": "size-limit --why",
     "clean": "rm -fr node_modules dist"
   },
   "prettier": {
@@ -28,23 +26,11 @@
   "name": "@wtree-id/offchain-resolver-gateway-worker",
   "author": "Nick Johnson",
   "module": "dist/gateway.esm.js",
-  "size-limit": [
-    {
-      "path": "dist/gateway.cjs.production.min.js",
-      "limit": "10 KB"
-    },
-    {
-      "path": "dist/gateway.esm.js",
-      "limit": "10 KB"
-    }
-  ],
   "devDependencies": {
-    "@size-limit/preset-small-lib": "^11.0.1",
     "@types/chai-as-promised": "^7.1.8",
     "chai-as-promised": "^7.1.1",
     "ganache-cli": "^6.12.2",
     "husky": "^8.0.3",
-    "size-limit": "^11.0.1",
     "tsdx": "^0.14.1",
     "tslib": "^2.6.2",
     "typescript": "^5.3.3",
@@ -56,6 +42,6 @@
     "@wtree-id/offchain-resolver-contracts": "^0.2.1",
     "dotenv": "^16.3.1",
     "ethers": "^6.9.1",
-    "itty-router": "^4.0.23"
+    "itty-router": "^4.0.25"
   }
 }
