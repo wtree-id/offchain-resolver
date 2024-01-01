@@ -13,8 +13,7 @@
   "scripts": {
     "start": "node dist/index.js",
     "build": "tsc -p ./tsconfig.json",
-    "test": "./test/run_tests.sh",
-    "test:run": "jest",
+    "test": "jest",
     "clean": "rm -fr node_modules dist"
   },
   "prettier": {

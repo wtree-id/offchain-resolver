@@ -15,7 +15,7 @@ jobs:
         with:
           node-version: 20.x
           cache: "npm"
-      - run: npm ci --omit="optional"
+      - run: npm i --omit="optional"
 
       # - name: Lint
       #   run: npm run lint
