@@ -27,7 +27,6 @@
   "author": "Nick Johnson",
   "module": "dist/gateway.esm.js",
   "devDependencies": {
-    "@size-limit/preset-small-lib": "^11.0.1",
     "@types/chai-as-promised": "^7.1.8",
     "@types/jest": "^29.5.11",
     "ganache": "^7.9.2",
