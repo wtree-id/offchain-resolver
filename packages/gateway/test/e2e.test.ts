@@ -1,14 +1,11 @@
-/// <reference types="./ganache-cli" />
-import chai, { expect } from 'chai';
-import chaiAsPromised from 'chai-as-promised';
 import { ethers } from 'ethers';
+import ganache, { Server } from 'ganache';
 import { JSONDatabase } from '../src/json';
 import { makeServer } from '../src/server';
 import { ETH_COIN_TYPE } from '../src/utils';
 import Resolver_abi from '@ensdomains/ens-contracts/artifacts/contracts/resolvers/Resolver.sol/Resolver.json';
 import OffchainResolver_abi from '@wtree-id/offchain-resolver-contracts/artifacts/contracts/OffchainResolver.sol/OffchainResolver.json';
 import http from 'http';
-chai.use(chaiAsPromised);
 
 const Resolver = new ethers.Interface(Resolver_abi.abi);
 
@@ -43,8 +40,16 @@ describe('End to end test', () => {
   let snapshot: number;
   let expressServer: http.Server;
   let provider: ethers.JsonRpcApiProvider;
+  let ganacheServer: Server;
 
   beforeAll(async () => {
+    ganacheServer = ganache.server({
+      logging: {
+        quiet: true,
+      },
+    });
+    await ganacheServer.listen(8545);
+
     const key = new ethers.SigningKey(TEST_PRIVATE_KEY);
     provider = new ethers.JsonRpcProvider('http://127.0.0.1:8545', 1337);
     const signer = await provider.getSigner();
@@ -64,6 +69,7 @@ describe('End to end test', () => {
 
   afterAll(async () => {
     expressServer.close();
+    ganacheServer.close();
   });
 
   afterEach(async () => {
@@ -83,7 +89,7 @@ describe('End to end test', () => {
         }
       );
       const resultData = Resolver.decodeFunctionResult('addr(bytes32)', result);
-      expect(resultData).to.deep.equal([
+      expect(resultData).toEqual([
         TEST_DB['test.eth'].addresses[ETH_COIN_TYPE],
       ]);
     });
@@ -104,7 +110,7 @@ describe('End to end test', () => {
         'text(bytes32,string)',
         result
       );
-      expect(resultData).to.deep.equal([TEST_DB['test.eth'].text['email']]);
+      expect(resultData).toEqual([TEST_DB['test.eth'].text['email']]);
     });
 
     it('resolves calls to contenthash(bytes32)', async () => {
@@ -122,7 +128,7 @@ describe('End to end test', () => {
         'contenthash(bytes32)',
         result
       );
-      expect(resultData).to.deep.equal([TEST_DB['test.eth'].contenthash]);
+      expect(resultData).toEqual([TEST_DB['test.eth'].contenthash]);
     });
   });
 });
