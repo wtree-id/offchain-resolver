@@ -2,9 +2,9 @@ name: CI
 on: [push]
 jobs:
   build:
-    name: Build, lint, and test on Node 20 and ubuntu-latest
+    name: Build, lint, and test on Node 20 and macos-latest
 
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
 
     steps:
       - name: Checkout repo
@@ -15,7 +15,7 @@ jobs:
         with:
           node-version: 20.x
           cache: "npm"
-      - run: npm i --omit="optional"
+      - run: npm ci
 
       # - name: Lint
       #   run: npm run lint
