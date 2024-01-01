@@ -26,6 +26,7 @@
     "ethers": "^6.9.1",
     "hardhat": "^2.19.4",
     "hardhat-deploy": "^0.11.45",
+    "tslib": "^2.6.2",
     "typescript": "^5.3.3"
   },
   "dependencies": {},
