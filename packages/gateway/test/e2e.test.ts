@@ -9,8 +9,7 @@ import http from 'http';
 
 const Resolver = new ethers.Interface(Resolver_abi.abi);
 
-const TEST_PRIVATE_KEY =
-  '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
+const TEST_PRIVATE_KEY = '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
 const TEST_URL = 'http://localhost:8080/rpc/{sender}/{data}.json';
 
 function deploySolidity(data: any, signer: ethers.Signer, ...args: any[]) {
@@ -30,8 +29,7 @@ const TEST_DB = {
       [ETH_COIN_TYPE]: '0x3456345634563456345634563456345634563456',
     },
     text: { email: 'test@example.com' },
-    contenthash:
-      '0xe40101fa011b20d1de9994b4d039f6548d191eb26786769f580809256b4685ef316805265ea162',
+    contenthash: '0xe40101fa011b20d1de9994b4d039f6548d191eb26786769f580809256b4685ef316805265ea162',
   },
 };
 
@@ -55,11 +53,7 @@ describe('End to end test', () => {
     const signer = await provider.getSigner();
     const signerAddress = ethers.computeAddress(key.privateKey);
     // @ts-expect-error fook it
-    resolver = (
-      await deploySolidity(OffchainResolver_abi, signer, TEST_URL, [
-        signerAddress,
-      ])
-    ).connect(provider);
+    resolver = (await deploySolidity(OffchainResolver_abi, signer, TEST_URL, [signerAddress])).connect(provider);
     snapshot = await provider.send('evm_snapshot', []);
     const db = new JSONDatabase(TEST_DB, 300);
     const server = makeServer(key, db);
@@ -78,56 +72,29 @@ describe('End to end test', () => {
 
   describe('resolve()', () => {
     it('resolves calls to addr(bytes32)', async () => {
-      const callData = Resolver.encodeFunctionData('addr(bytes32)', [
-        ethers.namehash('test.eth'),
-      ]);
-      const result = await resolver.resolve(
-        ethers.dnsEncode('test.eth'),
-        callData,
-        {
-          enableCcipRead: true,
-        }
-      );
+      const callData = Resolver.encodeFunctionData('addr(bytes32)', [ethers.namehash('test.eth')]);
+      const result = await resolver.resolve(ethers.dnsEncode('test.eth'), callData, {
+        enableCcipRead: true,
+      });
       const resultData = Resolver.decodeFunctionResult('addr(bytes32)', result);
-      expect(resultData).toEqual([
-        TEST_DB['test.eth'].addresses[ETH_COIN_TYPE],
-      ]);
+      expect(resultData).toEqual([TEST_DB['test.eth'].addresses[ETH_COIN_TYPE]]);
     });
 
     it('resolves calls to text(bytes32,string)', async () => {
-      const callData = Resolver.encodeFunctionData('text(bytes32,string)', [
-        ethers.namehash('test.eth'),
-        'email',
-      ]);
-      const result = await resolver.resolve(
-        ethers.dnsEncode('test.eth'),
-        callData,
-        {
-          enableCcipRead: true,
-        }
-      );
-      const resultData = Resolver.decodeFunctionResult(
-        'text(bytes32,string)',
-        result
-      );
+      const callData = Resolver.encodeFunctionData('text(bytes32,string)', [ethers.namehash('test.eth'), 'email']);
+      const result = await resolver.resolve(ethers.dnsEncode('test.eth'), callData, {
+        enableCcipRead: true,
+      });
+      const resultData = Resolver.decodeFunctionResult('text(bytes32,string)', result);
       expect(resultData).toEqual([TEST_DB['test.eth'].text['email']]);
     });
 
     it('resolves calls to contenthash(bytes32)', async () => {
-      const callData = Resolver.encodeFunctionData('contenthash(bytes32)', [
-        ethers.namehash('test.eth'),
-      ]);
-      const result = await resolver.resolve(
-        ethers.dnsEncode('test.eth'),
-        callData,
-        {
-          enableCcipRead: true,
-        }
-      );
-      const resultData = Resolver.decodeFunctionResult(
-        'contenthash(bytes32)',
-        result
-      );
+      const callData = Resolver.encodeFunctionData('contenthash(bytes32)', [ethers.namehash('test.eth')]);
+      const result = await resolver.resolve(ethers.dnsEncode('test.eth'), callData, {
+        enableCcipRead: true,
+      });
+      const resultData = Resolver.decodeFunctionResult('contenthash(bytes32)', result);
       expect(resultData).toEqual([TEST_DB['test.eth'].contenthash]);
     });
   });

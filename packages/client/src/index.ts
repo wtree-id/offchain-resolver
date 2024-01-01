@@ -21,12 +21,12 @@ const provider = new ethers.JsonRpcProvider(options.provider, {
 });
 (async () => {
   const name = program.args[0];
-  let resolver = await provider.getResolver(name);
+  const resolver = await provider.getResolver(name);
   if (resolver) {
-    let ethAddress = await resolver.getAddress();
-    let btcAddress = await resolver.getAddress(0);
-    let content = await resolver.getContentHash();
-    let email = await resolver.getText('email');
+    const ethAddress = await resolver.getAddress();
+    const btcAddress = await resolver.getAddress(0);
+    const content = await resolver.getContentHash();
+    const email = await resolver.getText('email');
     console.log(`resolver address ${resolver.address}`);
     console.log(`eth address ${ethAddress}`);
     console.log(`btc address ${btcAddress}`);

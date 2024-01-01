@@ -12,22 +12,14 @@ export interface RPCResponse {
   body: any;
 }
 
-export type HandlerFunc = (
-  args: ethers.Result,
-  req: RPCCall
-) => Promise<Array<any>> | Array<any>;
+export type HandlerFunc = (args: ethers.Result, req: RPCCall) => Promise<Array<any>> | Array<any>;
 
 interface Handler {
   type: ethers.FunctionFragment;
   func: HandlerFunc;
 }
 
-function toInterface(
-  abi:
-    | string
-    | readonly (string | ethers.Fragment | ethers.JsonFragment)[]
-    | ethers.Interface
-) {
+function toInterface(abi: string | readonly (string | ethers.Fragment | ethers.JsonFragment)[] | ethers.Interface) {
   if (abi instanceof ethers.Interface) {
     return abi;
   }
@@ -85,11 +77,8 @@ export class Server {
    * @param handlers An array of handlers to register against this interface.
    */
   add(
-    abi:
-      | string
-      | readonly (string | ethers.Fragment | ethers.JsonFragment)[]
-      | ethers.Interface,
-    handlers: Array<HandlerDescription>
+    abi: string | readonly (string | ethers.Fragment | ethers.JsonFragment)[] | ethers.Interface,
+    handlers: Array<HandlerDescription>,
   ) {
     const abiInterface = toInterface(abi);
 
@@ -100,9 +89,7 @@ export class Server {
       }
 
       const functionSignature = ethers
-        .keccak256(
-          ethers.toUtf8Bytes(ethers.Fragment.from(fn).format('sighash'))
-        )
+        .keccak256(ethers.toUtf8Bytes(ethers.Fragment.from(fn).format('sighash')))
         .slice(0, 10);
       this.handlers[functionSignature] = {
         type: fn,
@@ -192,10 +179,7 @@ export class Server {
     }
 
     // Decode function arguments
-    const args = ethers.AbiCoder.defaultAbiCoder().decode(
-      handler.type.inputs,
-      '0x' + calldata.slice(10)
-    );
+    const args = ethers.AbiCoder.defaultAbiCoder().decode(handler.type.inputs, '0x' + calldata.slice(10));
 
     // Call the handler
     const result = await handler.func(args, call);
@@ -205,12 +189,7 @@ export class Server {
       status: 200,
       body: {
         data: handler.type.outputs
-          ? hexlify(
-              ethers.AbiCoder.defaultAbiCoder().encode(
-                handler.type.outputs,
-                result
-              )
-            )
+          ? hexlify(ethers.AbiCoder.defaultAbiCoder().encode(handler.type.outputs, result))
           : '0x',
       },
     };

@@ -13,7 +13,7 @@ import type {
   ContractRunner,
   ContractMethod,
   Listener,
-} from "ethers";
+} from 'ethers';
 import type {
   TypedContractEvent,
   TypedDeferredTopicFilter,
@@ -21,58 +21,31 @@ import type {
   TypedLogDescription,
   TypedListener,
   TypedContractMethod,
-} from "../../common";
+} from '../../common';
 
 export interface OffchainResolverInterface extends Interface {
   getFunction(
-    nameOrSignature:
-      | "makeSignatureHash"
-      | "resolve"
-      | "resolveWithProof"
-      | "signers"
-      | "supportsInterface"
-      | "url"
+    nameOrSignature: 'makeSignatureHash' | 'resolve' | 'resolveWithProof' | 'signers' | 'supportsInterface' | 'url',
   ): FunctionFragment;
 
-  getEvent(nameOrSignatureOrTopic: "NewSigners"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'NewSigners'): EventFragment;
 
   encodeFunctionData(
-    functionFragment: "makeSignatureHash",
-    values: [AddressLike, BigNumberish, BytesLike, BytesLike]
+    functionFragment: 'makeSignatureHash',
+    values: [AddressLike, BigNumberish, BytesLike, BytesLike],
   ): string;
-  encodeFunctionData(
-    functionFragment: "resolve",
-    values: [BytesLike, BytesLike]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "resolveWithProof",
-    values: [BytesLike, BytesLike]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "signers",
-    values: [AddressLike]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "supportsInterface",
-    values: [BytesLike]
-  ): string;
-  encodeFunctionData(functionFragment: "url", values?: undefined): string;
+  encodeFunctionData(functionFragment: 'resolve', values: [BytesLike, BytesLike]): string;
+  encodeFunctionData(functionFragment: 'resolveWithProof', values: [BytesLike, BytesLike]): string;
+  encodeFunctionData(functionFragment: 'signers', values: [AddressLike]): string;
+  encodeFunctionData(functionFragment: 'supportsInterface', values: [BytesLike]): string;
+  encodeFunctionData(functionFragment: 'url', values?: undefined): string;
 
-  decodeFunctionResult(
-    functionFragment: "makeSignatureHash",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "resolve", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "resolveWithProof",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "signers", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "supportsInterface",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "url", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'makeSignatureHash', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'resolve', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'resolveWithProof', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'signers', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'supportsInterface', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'url', data: BytesLike): Result;
 }
 
 export namespace NewSignersEvent {
@@ -96,119 +69,69 @@ export interface OffchainResolver extends BaseContract {
   queryFilter<TCEvent extends TypedContractEvent>(
     event: TCEvent,
     fromBlockOrBlockhash?: string | number | undefined,
-    toBlock?: string | number | undefined
+    toBlock?: string | number | undefined,
   ): Promise<Array<TypedEventLog<TCEvent>>>;
   queryFilter<TCEvent extends TypedContractEvent>(
     filter: TypedDeferredTopicFilter<TCEvent>,
     fromBlockOrBlockhash?: string | number | undefined,
-    toBlock?: string | number | undefined
+    toBlock?: string | number | undefined,
   ): Promise<Array<TypedEventLog<TCEvent>>>;
 
-  on<TCEvent extends TypedContractEvent>(
-    event: TCEvent,
-    listener: TypedListener<TCEvent>
-  ): Promise<this>;
+  on<TCEvent extends TypedContractEvent>(event: TCEvent, listener: TypedListener<TCEvent>): Promise<this>;
   on<TCEvent extends TypedContractEvent>(
     filter: TypedDeferredTopicFilter<TCEvent>,
-    listener: TypedListener<TCEvent>
+    listener: TypedListener<TCEvent>,
   ): Promise<this>;
 
-  once<TCEvent extends TypedContractEvent>(
-    event: TCEvent,
-    listener: TypedListener<TCEvent>
-  ): Promise<this>;
+  once<TCEvent extends TypedContractEvent>(event: TCEvent, listener: TypedListener<TCEvent>): Promise<this>;
   once<TCEvent extends TypedContractEvent>(
     filter: TypedDeferredTopicFilter<TCEvent>,
-    listener: TypedListener<TCEvent>
+    listener: TypedListener<TCEvent>,
   ): Promise<this>;
 
-  listeners<TCEvent extends TypedContractEvent>(
-    event: TCEvent
-  ): Promise<Array<TypedListener<TCEvent>>>;
+  listeners<TCEvent extends TypedContractEvent>(event: TCEvent): Promise<Array<TypedListener<TCEvent>>>;
   listeners(eventName?: string): Promise<Array<Listener>>;
-  removeAllListeners<TCEvent extends TypedContractEvent>(
-    event?: TCEvent
-  ): Promise<this>;
+  removeAllListeners<TCEvent extends TypedContractEvent>(event?: TCEvent): Promise<this>;
 
   makeSignatureHash: TypedContractMethod<
-    [
-      target: AddressLike,
-      expires: BigNumberish,
-      request: BytesLike,
-      result: BytesLike
-    ],
+    [target: AddressLike, expires: BigNumberish, request: BytesLike, result: BytesLike],
     [string],
-    "view"
+    'view'
   >;
 
-  resolve: TypedContractMethod<
-    [name: BytesLike, data: BytesLike],
-    [string],
-    "view"
-  >;
+  resolve: TypedContractMethod<[name: BytesLike, data: BytesLike], [string], 'view'>;
 
-  resolveWithProof: TypedContractMethod<
-    [response: BytesLike, extraData: BytesLike],
-    [string],
-    "view"
-  >;
+  resolveWithProof: TypedContractMethod<[response: BytesLike, extraData: BytesLike], [string], 'view'>;
 
-  signers: TypedContractMethod<[arg0: AddressLike], [boolean], "view">;
+  signers: TypedContractMethod<[arg0: AddressLike], [boolean], 'view'>;
 
-  supportsInterface: TypedContractMethod<
-    [interfaceID: BytesLike],
-    [boolean],
-    "view"
-  >;
+  supportsInterface: TypedContractMethod<[interfaceID: BytesLike], [boolean], 'view'>;
 
-  url: TypedContractMethod<[], [string], "view">;
+  url: TypedContractMethod<[], [string], 'view'>;
 
-  getFunction<T extends ContractMethod = ContractMethod>(
-    key: string | FunctionFragment
-  ): T;
+  getFunction<T extends ContractMethod = ContractMethod>(key: string | FunctionFragment): T;
 
   getFunction(
-    nameOrSignature: "makeSignatureHash"
+    nameOrSignature: 'makeSignatureHash',
   ): TypedContractMethod<
-    [
-      target: AddressLike,
-      expires: BigNumberish,
-      request: BytesLike,
-      result: BytesLike
-    ],
+    [target: AddressLike, expires: BigNumberish, request: BytesLike, result: BytesLike],
     [string],
-    "view"
+    'view'
   >;
+  getFunction(nameOrSignature: 'resolve'): TypedContractMethod<[name: BytesLike, data: BytesLike], [string], 'view'>;
   getFunction(
-    nameOrSignature: "resolve"
-  ): TypedContractMethod<[name: BytesLike, data: BytesLike], [string], "view">;
-  getFunction(
-    nameOrSignature: "resolveWithProof"
-  ): TypedContractMethod<
-    [response: BytesLike, extraData: BytesLike],
-    [string],
-    "view"
-  >;
-  getFunction(
-    nameOrSignature: "signers"
-  ): TypedContractMethod<[arg0: AddressLike], [boolean], "view">;
-  getFunction(
-    nameOrSignature: "supportsInterface"
-  ): TypedContractMethod<[interfaceID: BytesLike], [boolean], "view">;
-  getFunction(
-    nameOrSignature: "url"
-  ): TypedContractMethod<[], [string], "view">;
+    nameOrSignature: 'resolveWithProof',
+  ): TypedContractMethod<[response: BytesLike, extraData: BytesLike], [string], 'view'>;
+  getFunction(nameOrSignature: 'signers'): TypedContractMethod<[arg0: AddressLike], [boolean], 'view'>;
+  getFunction(nameOrSignature: 'supportsInterface'): TypedContractMethod<[interfaceID: BytesLike], [boolean], 'view'>;
+  getFunction(nameOrSignature: 'url'): TypedContractMethod<[], [string], 'view'>;
 
   getEvent(
-    key: "NewSigners"
-  ): TypedContractEvent<
-    NewSignersEvent.InputTuple,
-    NewSignersEvent.OutputTuple,
-    NewSignersEvent.OutputObject
-  >;
+    key: 'NewSigners',
+  ): TypedContractEvent<NewSignersEvent.InputTuple, NewSignersEvent.OutputTuple, NewSignersEvent.OutputObject>;
 
   filters: {
-    "NewSigners(address[])": TypedContractEvent<
+    'NewSigners(address[])': TypedContractEvent<
       NewSignersEvent.InputTuple,
       NewSignersEvent.OutputTuple,
       NewSignersEvent.OutputObject

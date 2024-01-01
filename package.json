@@ -19,6 +19,8 @@
     "start:client": "npm run start --workspace @ensdomains/offchain-resolver-client",
     "test": "npm run test --workspaces",
     "lint": "npm run lint --workspaces",
+    "lint:check": "eslint './packages/**/*.{js,jsx,ts,tsx}'",
+    "format": "prettier --write './packages/**/*.{js,jsx,ts,tsx}'",
     "build": "npm run build --workspaces",
     "clean": "rm -fr node_modules && npm run clean --workspaces"
   },

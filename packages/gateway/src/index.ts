@@ -5,10 +5,7 @@ import { ethers } from 'ethers';
 import { JSONDatabase } from './json';
 const program = new Command();
 program
-  .requiredOption(
-    '-k --private-key <key>',
-    'Private key to sign responses with. Prefix with @ to read from a file'
-  )
+  .requiredOption('-k --private-key <key>', 'Private key to sign responses with. Prefix with @ to read from a file')
   .requiredOption('-d --data <file>', 'JSON file to read data from')
   .option('-t --ttl <number>', 'TTL for signatures', '300')
   .option('-p --port <number>', 'Port number to serve on', '8080');
@@ -16,9 +13,7 @@ program.parse(process.argv);
 const options = program.opts();
 let privateKey = options.privateKey;
 if (privateKey.startsWith('@')) {
-  privateKey = ethers.toBeArray(
-    readFileSync(privateKey.slice(1), { encoding: 'utf-8' })
-  );
+  privateKey = ethers.toBeArray(readFileSync(privateKey.slice(1), { encoding: 'utf-8' }));
 }
 const address = ethers.computeAddress(privateKey);
 const signer = new ethers.SigningKey(privateKey);

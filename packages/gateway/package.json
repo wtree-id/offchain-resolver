@@ -16,12 +16,6 @@
     "test": "jest",
     "clean": "rm -fr node_modules dist"
   },
-  "prettier": {
-    "printWidth": 80,
-    "semi": true,
-    "singleQuote": true,
-    "trailingComma": "es5"
-  },
   "name": "@wtree-id/offchain-resolver-gateway",
   "author": "Nick Johnson",
   "module": "dist/gateway.esm.js",

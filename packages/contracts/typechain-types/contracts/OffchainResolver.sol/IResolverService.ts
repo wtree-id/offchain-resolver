@@ -10,24 +10,21 @@ import type {
   ContractRunner,
   ContractMethod,
   Listener,
-} from "ethers";
+} from 'ethers';
 import type {
   TypedContractEvent,
   TypedDeferredTopicFilter,
   TypedEventLog,
   TypedListener,
   TypedContractMethod,
-} from "../../common";
+} from '../../common';
 
 export interface IResolverServiceInterface extends Interface {
-  getFunction(nameOrSignature: "resolve"): FunctionFragment;
+  getFunction(nameOrSignature: 'resolve'): FunctionFragment;
 
-  encodeFunctionData(
-    functionFragment: "resolve",
-    values: [BytesLike, BytesLike]
-  ): string;
+  encodeFunctionData(functionFragment: 'resolve', values: [BytesLike, BytesLike]): string;
 
-  decodeFunctionResult(functionFragment: "resolve", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'resolve', data: BytesLike): Result;
 }
 
 export interface IResolverService extends BaseContract {
@@ -39,39 +36,29 @@ export interface IResolverService extends BaseContract {
   queryFilter<TCEvent extends TypedContractEvent>(
     event: TCEvent,
     fromBlockOrBlockhash?: string | number | undefined,
-    toBlock?: string | number | undefined
+    toBlock?: string | number | undefined,
   ): Promise<Array<TypedEventLog<TCEvent>>>;
   queryFilter<TCEvent extends TypedContractEvent>(
     filter: TypedDeferredTopicFilter<TCEvent>,
     fromBlockOrBlockhash?: string | number | undefined,
-    toBlock?: string | number | undefined
+    toBlock?: string | number | undefined,
   ): Promise<Array<TypedEventLog<TCEvent>>>;
 
-  on<TCEvent extends TypedContractEvent>(
-    event: TCEvent,
-    listener: TypedListener<TCEvent>
-  ): Promise<this>;
+  on<TCEvent extends TypedContractEvent>(event: TCEvent, listener: TypedListener<TCEvent>): Promise<this>;
   on<TCEvent extends TypedContractEvent>(
     filter: TypedDeferredTopicFilter<TCEvent>,
-    listener: TypedListener<TCEvent>
+    listener: TypedListener<TCEvent>,
   ): Promise<this>;
 
-  once<TCEvent extends TypedContractEvent>(
-    event: TCEvent,
-    listener: TypedListener<TCEvent>
-  ): Promise<this>;
+  once<TCEvent extends TypedContractEvent>(event: TCEvent, listener: TypedListener<TCEvent>): Promise<this>;
   once<TCEvent extends TypedContractEvent>(
     filter: TypedDeferredTopicFilter<TCEvent>,
-    listener: TypedListener<TCEvent>
+    listener: TypedListener<TCEvent>,
   ): Promise<this>;
 
-  listeners<TCEvent extends TypedContractEvent>(
-    event: TCEvent
-  ): Promise<Array<TypedListener<TCEvent>>>;
+  listeners<TCEvent extends TypedContractEvent>(event: TCEvent): Promise<Array<TypedListener<TCEvent>>>;
   listeners(eventName?: string): Promise<Array<Listener>>;
-  removeAllListeners<TCEvent extends TypedContractEvent>(
-    event?: TCEvent
-  ): Promise<this>;
+  removeAllListeners<TCEvent extends TypedContractEvent>(event?: TCEvent): Promise<this>;
 
   resolve: TypedContractMethod<
     [name: BytesLike, data: BytesLike],
@@ -80,27 +67,23 @@ export interface IResolverService extends BaseContract {
         result: string;
         expires: bigint;
         sig: string;
-      }
+      },
     ],
-    "view"
+    'view'
   >;
 
-  getFunction<T extends ContractMethod = ContractMethod>(
-    key: string | FunctionFragment
-  ): T;
+  getFunction<T extends ContractMethod = ContractMethod>(key: string | FunctionFragment): T;
 
-  getFunction(
-    nameOrSignature: "resolve"
-  ): TypedContractMethod<
+  getFunction(nameOrSignature: 'resolve'): TypedContractMethod<
     [name: BytesLike, data: BytesLike],
     [
       [string, bigint, string] & {
         result: string;
         expires: bigint;
         sig: string;
-      }
+      },
     ],
-    "view"
+    'view'
   >;
 
   filters: {};

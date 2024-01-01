@@ -20,12 +20,6 @@
     "test": "echo No tests"
   },
   "peerDependencies": {},
-  "prettier": {
-    "printWidth": 80,
-    "semi": true,
-    "singleQuote": true,
-    "trailingComma": "es5"
-  },
   "devDependencies": {
     "husky": "^8.0.3",
     "typescript": "^5.3.3",

@@ -29,10 +29,7 @@ export class JSONDatabase implements Database {
   }
 
   static fromFilename(filename: string, ttl: number) {
-    return new JSONDatabase(
-      JSON.parse(readFileSync(filename, { encoding: 'utf-8' })),
-      ttl
-    );
+    return new JSONDatabase(JSON.parse(readFileSync(filename, { encoding: 'utf-8' })), ttl);
   }
 
   addr(name: string, coinType: number) {

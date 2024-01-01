@@ -21,7 +21,7 @@ const routeHandler = (env: any) => {
 };
 
 export default {
-  async fetch(request: Request, env: any, _context: any) {
+  async fetch(request: Request, env: any) {
     const router = routeHandler(env);
     return router.handle(request).then(json);
   },

@@ -1,5 +1,5 @@
-import { DeployFunction } from "hardhat-deploy/types"
-import { HardhatRuntimeEnvironment } from "hardhat/types"
+import { DeployFunction } from 'hardhat-deploy/types';
+import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
 const deploy: DeployFunction = async ({
   getNamedAccounts,
@@ -7,29 +7,29 @@ const deploy: DeployFunction = async ({
   network,
   ethers,
 }: HardhatRuntimeEnvironment) => {
-  const { deploy } = deployments
-  const { deployer } = await getNamedAccounts()
+  const { deploy } = deployments;
+  const { deployer } = await getNamedAccounts();
 
-  let contractDeployer = deployer
+  let contractDeployer = deployer;
   if (!contractDeployer && !network.tags.test) {
-    throw new Error("deployer is not set")
+    throw new Error('deployer is not set');
   } else {
-    const signers = await ethers.getSigners()
-    contractDeployer = signers[0].address
+    const signers = await ethers.getSigners();
+    contractDeployer = signers[0].address;
   }
 
   if (!network.config.gatewayurl) {
-    throw "gatewayurl is missing on hardhat.config.js"
+    throw 'gatewayurl is missing on hardhat.config.js';
   }
 
-  await deploy("OffchainResolver", {
+  await deploy('OffchainResolver', {
     from: contractDeployer,
     args: [network.config.gatewayurl, [contractDeployer]],
     log: true,
     deterministicDeployment: true,
-  })
-}
+  });
+};
 
-deploy.tags = ["demo", "test"]
+deploy.tags = ['demo', 'test'];
 
-export default deploy
+export default deploy;

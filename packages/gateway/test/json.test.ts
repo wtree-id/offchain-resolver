@@ -89,5 +89,3 @@ describe('JSONDatabase', () => {
     });
   });
 });
-
-describe('makeApp', () => {});

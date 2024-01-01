@@ -1,19 +1,19 @@
-import "hardhat/types/config"
+import 'hardhat/types/config';
 
-declare module "hardhat/types/config" {
+declare module 'hardhat/types/config' {
   interface HardhatNetworkUserConfig {
-    gatewayurl?: string
+    gatewayurl?: string;
   }
 
   interface HttpNetworkUserConfig {
-    gatewayurl?: string
+    gatewayurl?: string;
   }
 
   interface HardhatNetworkConfig {
-    gatewayurl?: string
+    gatewayurl?: string;
   }
 
   interface HttpNetworkConfig {
-    gatewayurl?: string
+    gatewayurl?: string;
   }
 }

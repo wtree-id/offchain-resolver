@@ -15,39 +15,29 @@ interface DatabaseResult {
 type PromiseOrResult<T> = T | Promise<T>;
 
 export interface Database {
-  addr(
-    name: string,
-    coinType: number
-  ): PromiseOrResult<{ addr: string; ttl: number }>;
-  text(
-    name: string,
-    key: string
-  ): PromiseOrResult<{ value: string; ttl: number }>;
-  contenthash(
-    name: string
-  ): PromiseOrResult<{ contenthash: string; ttl: number }>;
+  addr(name: string, coinType: number): PromiseOrResult<{ addr: string; ttl: number }>;
+  text(name: string, key: string): PromiseOrResult<{ value: string; ttl: number }>;
+  contenthash(name: string): PromiseOrResult<{ contenthash: string; ttl: number }>;
 }
 
 function decodeDnsName(dnsname: Buffer) {
   const labels = [];
   let idx = 0;
+
   while (true) {
     const len = dnsname.readUInt8(idx);
     if (len === 0) break;
     labels.push(dnsname.slice(idx + 1, idx + len + 1).toString('utf8'));
     idx += len + 1;
   }
+
   return labels.join('.');
 }
 
 const queryHandlers: {
-  [key: string]: (
-    db: Database,
-    name: string,
-    args: Result
-  ) => Promise<DatabaseResult>;
+  [key: string]: (db: Database, name: string, args: Result) => Promise<DatabaseResult>;
 } = {
-  'addr(bytes32)': async (db, name, _args) => {
+  'addr(bytes32)': async (db, name) => {
     const { addr, ttl } = await db.addr(name, ETH_COIN_TYPE);
     return { result: [addr], ttl };
   },
@@ -59,17 +49,13 @@ const queryHandlers: {
     const { value, ttl } = await db.text(name, args[0]);
     return { result: [value], ttl };
   },
-  'contenthash(bytes32)': async (db, name, _args) => {
+  'contenthash(bytes32)': async (db, name) => {
     const { contenthash, ttl } = await db.contenthash(name);
     return { result: [contenthash], ttl };
   },
 };
 
-async function query(
-  db: Database,
-  name: string,
-  data: string
-): Promise<{ result: BytesLike; validUntil: number }> {
+async function query(db: Database, name: string, data: string): Promise<{ result: BytesLike; validUntil: number }> {
   // Parse the data nested inside the second argument to `resolve`
   const parsedTx = ResolverInterface.parseTransaction({ data });
   if (!parsedTx) {
@@ -98,10 +84,7 @@ async function query(
   };
 }
 
-export function makeServer(
-  signer: ethers.SigningKey,
-  db: Database | Promise<Database>
-) {
+export function makeServer(signer: ethers.SigningKey, db: Database | Promise<Database>) {
   const server = new Server();
   server.add(IResolverService_abi, [
     {
@@ -112,15 +95,9 @@ export function makeServer(
         const { result, validUntil } = await query(await db, name, data);
 
         // Hash and sign the response
-        let messageHash = ethers.solidityPackedKeccak256(
+        const messageHash = ethers.solidityPackedKeccak256(
           ['bytes', 'address', 'uint64', 'bytes32', 'bytes32'],
-          [
-            '0x1900',
-            request?.to,
-            validUntil,
-            ethers.keccak256(request?.data || '0x'),
-            ethers.keccak256(result),
-          ]
+          ['0x1900', request?.to, validUntil, ethers.keccak256(request?.data || '0x'), ethers.keccak256(result)],
         );
         const sig = signer.sign(messageHash);
         const sigData = concat([sig.r, sig.s, `0x${sig.v.toString(16)}`]);
@@ -131,10 +108,6 @@ export function makeServer(
   return server;
 }
 
-export function makeRouter(
-  signer: ethers.SigningKey,
-  path: string,
-  db: Database | Promise<Database>
-): RouterType {
+export function makeRouter(signer: ethers.SigningKey, path: string, db: Database | Promise<Database>): RouterType {
   return makeServer(signer, db).makeApp(path);
 }
