@@ -1,4 +1,5 @@
 import { ethers, deployments } from "hardhat"
+import { expect } from "chai"
 import { concat } from "ethers"
 
 const TEST_ADDRESS = "0xCAfEcAfeCAfECaFeCaFecaFecaFECafECafeCaFe"
