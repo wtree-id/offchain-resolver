@@ -20,14 +20,20 @@ export interface Database {
   contenthash(name: string): PromiseOrResult<{ contenthash: string; ttl: number }>;
 }
 
-function decodeDnsName(dnsname: Buffer) {
-  const labels = [];
+function decodeDnsName(dnsname: Uint8Array): string {
+  const labels: string[] = [];
   let idx = 0;
 
+  // eslint-disable-next-line no-constant-condition
   while (true) {
-    const len = dnsname.readUInt8(idx);
+    const len = dnsname[idx];
+
     if (len === 0) break;
-    labels.push(dnsname.slice(idx + 1, idx + len + 1).toString('utf8'));
+
+    const labelBytes = dnsname.subarray(idx + 1, idx + len + 1);
+    const label = String.fromCharCode.apply(null, Array.from(labelBytes));
+    labels.push(label);
+
     idx += len + 1;
   }
 

@@ -23,6 +23,7 @@ function decodeDnsName(dnsname: Uint8Array): string {
   const labels: string[] = [];
   let idx = 0;
 
+  // eslint-disable-next-line no-constant-condition
   while (true) {
     const len = dnsname[idx];
 
