@@ -79,6 +79,10 @@ describe('OffchainResolver', () => {
   describe('resolveWithProof()', async () => {
     it('resolves an address given a valid signature', async () => {
       const { resolver, callData, expires, resultData, sig, addrIface } = await setupTests();
+      const encodedCallDataWithSigner = ethers.AbiCoder.defaultAbiCoder().encode(
+        ['bytes', 'address'],
+        [callData, await resolver.getAddress()],
+      );
 
       // Generate the response data
       const response = ethers.AbiCoder.defaultAbiCoder().encode(
@@ -87,7 +91,10 @@ describe('OffchainResolver', () => {
       );
 
       // Call the function with the request and response
-      const [result] = addrIface.decodeFunctionResult('addr', await resolver.resolveWithProof(response, callData));
+      const [result] = addrIface.decodeFunctionResult(
+        'addr',
+        await resolver.resolveWithProof(response, encodedCallDataWithSigner),
+      );
       expect(result).to.equal(TEST_ADDRESS);
     });
 

@@ -24,8 +24,9 @@ library SignatureVerifier {
      * @return result: The `result` decoded from `response`.
      */
     function verify(bytes calldata request, bytes calldata response) internal view returns(address, bytes memory) {
+        (bytes memory requestData, address sender) = abi.decode(request, (bytes, address));
         (bytes memory result, uint64 expires, bytes memory sig) = abi.decode(response, (bytes, uint64, bytes));
-        address signer = ECDSA.recover(makeSignatureHash(address(this), expires, request, result), sig);
+        address signer = ECDSA.recover(makeSignatureHash(sender, expires, requestData, result), sig);
         require(
             expires >= block.timestamp,
             "SignatureVerifier: Signature expired");

@@ -2,46 +2,46 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import { Contract, Interface, type ContractRunner } from 'ethers';
+import { Contract, Interface, type ContractRunner } from "ethers";
 import type {
   IResolverService,
   IResolverServiceInterface,
-} from '../../../contracts/OffchainResolver.sol/IResolverService';
+} from "../../../contracts/OffchainResolver.sol/IResolverService";
 
 const _abi = [
   {
     inputs: [
       {
-        internalType: 'bytes',
-        name: 'name',
-        type: 'bytes',
+        internalType: "bytes",
+        name: "name",
+        type: "bytes",
       },
       {
-        internalType: 'bytes',
-        name: 'data',
-        type: 'bytes',
+        internalType: "bytes",
+        name: "data",
+        type: "bytes",
       },
     ],
-    name: 'resolve',
+    name: "resolve",
     outputs: [
       {
-        internalType: 'bytes',
-        name: 'result',
-        type: 'bytes',
+        internalType: "bytes",
+        name: "result",
+        type: "bytes",
       },
       {
-        internalType: 'uint64',
-        name: 'expires',
-        type: 'uint64',
+        internalType: "uint64",
+        name: "expires",
+        type: "uint64",
       },
       {
-        internalType: 'bytes',
-        name: 'sig',
-        type: 'bytes',
+        internalType: "bytes",
+        name: "sig",
+        type: "bytes",
       },
     ],
-    stateMutability: 'view',
-    type: 'function',
+    stateMutability: "view",
+    type: "function",
   },
 ] as const;
 
@@ -50,7 +50,10 @@ export class IResolverService__factory {
   static createInterface(): IResolverServiceInterface {
     return new Interface(_abi) as IResolverServiceInterface;
   }
-  static connect(address: string, runner?: ContractRunner | null): IResolverService {
+  static connect(
+    address: string,
+    runner?: ContractRunner | null
+  ): IResolverService {
     return new Contract(address, _abi, runner) as unknown as IResolverService;
   }
 }

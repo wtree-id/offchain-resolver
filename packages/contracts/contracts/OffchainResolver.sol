@@ -77,7 +77,7 @@ contract OffchainResolver is ERC165, IExtendedResolver {
             urls,
             callData,
             OffchainResolver.resolveWithProof.selector,
-            callData
+            abi.encode(callData, address(this))
         );
     }
 
