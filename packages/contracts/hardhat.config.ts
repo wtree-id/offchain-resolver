@@ -1,5 +1,5 @@
 import '@nomicfoundation/hardhat-toolbox';
-import type { HardhatUserConfig, HttpNetworkUserConfig } from 'hardhat/types';
+import type { HardhatUserConfig } from 'hardhat/types';
 import 'hardhat-deploy';
 
 let real_accounts: string[] = [];
