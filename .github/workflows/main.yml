@@ -2,9 +2,9 @@ name: CI
 on: [push]
 jobs:
   build:
-    name: Build, lint, and test on Node 20 and macos-latest
+    name: Build, lint, and test on Node 20 and ubuntu-latest
 
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repo
