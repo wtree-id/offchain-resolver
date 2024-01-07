@@ -24,7 +24,7 @@
     "@openzeppelin/contracts": "^5.0.1",
     "@types/cors": "2.8.17",
     "@types/express": "^4.17.21",
-    "ethers": "^6.9.1",
+    "ethers": "^6.9.2",
     "hardhat": "^2.19.4",
     "hardhat-deploy": "^0.11.45",
     "tslib": "^2.6.2",
@@ -32,6 +32,6 @@
   },
   "dependencies": {},
   "optionalDependencies": {
-    "fsevents": "^2.3.2"
+    "fsevents": "^2.3.3"
   }
 }
