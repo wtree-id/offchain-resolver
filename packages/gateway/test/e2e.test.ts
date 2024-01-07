@@ -1,18 +1,19 @@
 import { ethers } from 'ethers';
+import http from 'http';
 import ganache, { Server } from 'ganache';
+import { IExtendedResolver } from '@wtree-id/offchain-resolver-contracts/typechain-types';
 import { JSONDatabase } from '../src/json';
 import { makeServer } from '../src/server';
 import { ETH_COIN_TYPE } from '../src/utils';
 import Resolver_abi from '@ensdomains/ens-contracts/artifacts/contracts/resolvers/Resolver.sol/Resolver.json';
 import OffchainResolver_abi from '@wtree-id/offchain-resolver-contracts/artifacts/contracts/OffchainResolver.sol/OffchainResolver.json';
-import http from 'http';
 
 const Resolver = new ethers.Interface(Resolver_abi.abi);
 
 const TEST_PRIVATE_KEY = '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
 const TEST_URL = 'http://localhost:8080/rpc/{sender}/{data}.json';
 
-function deploySolidity(data: any, signer: ethers.Signer, ...args: any[]) {
+function deploySolidity(data: Record<string, unknown>, signer: ethers.Signer, ...args: unknown[]) {
   const factory = ethers.ContractFactory.fromSolidity(data, signer);
   return factory.deploy(...args);
 }
@@ -34,7 +35,7 @@ const TEST_DB = {
 };
 
 describe('End to end test', () => {
-  let resolver: ethers.Contract;
+  let resolver: IExtendedResolver;
   let snapshot: number;
   let expressServer: http.Server;
   let provider: ethers.JsonRpcApiProvider;
@@ -52,8 +53,10 @@ describe('End to end test', () => {
     provider = new ethers.JsonRpcProvider('http://127.0.0.1:8545', 1337);
     const signer = await provider.getSigner();
     const signerAddress = ethers.computeAddress(key.privateKey);
-    // @ts-expect-error fook it
-    resolver = (await deploySolidity(OffchainResolver_abi, signer, TEST_URL, [signerAddress])).connect(provider);
+
+    resolver = (await deploySolidity(OffchainResolver_abi, signer, TEST_URL, [signerAddress])).connect(
+      provider,
+    ) as IExtendedResolver;
     snapshot = await provider.send('evm_snapshot', []);
     const db = new JSONDatabase(TEST_DB, 300);
     const server = makeServer(key, db);

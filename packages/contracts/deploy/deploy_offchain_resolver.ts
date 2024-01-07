@@ -19,7 +19,7 @@ const deploy: DeployFunction = async ({
   }
 
   if (!network.config.gatewayurl) {
-    throw 'gatewayurl is missing on hardhat.config.js';
+    throw new Error('gatewayurl is missing in hardhat config');
   }
 
   await deploy('OffchainResolver', {

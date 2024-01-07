@@ -3,12 +3,13 @@
   "license": "MIT",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
+  "type": "module",
   "files": [
     "dist",
     "src"
   ],
   "engines": {
-    "node": ">=10"
+    "node": ">=18"
   },
   "scripts": {
     "start": "node dist/index.js",

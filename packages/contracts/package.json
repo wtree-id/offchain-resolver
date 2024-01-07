@@ -6,7 +6,8 @@
   "license": "MIT",
   "files": [
     "contracts/*.sol",
-    "artifacts/contracts/**/*.json"
+    "artifacts/contracts/**/*.json",
+    "typechain-types"
   ],
   "scripts": {
     "test": "hardhat test",
