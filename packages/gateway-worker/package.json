@@ -29,14 +29,14 @@
     "ts-jest": "^29.1.1",
     "tslib": "^2.6.2",
     "typescript": "^5.3.3",
-    "wrangler": "^3.22.3"
+    "wrangler": "^3.22.1"
   },
   "dependencies": {
     "@cloudflare/workers-types": "^4.20231218.0",
     "@ensdomains/ens-contracts": "^1.0.0",
     "@wtree-id/offchain-resolver-contracts": "^0.2.1",
     "dotenv": "^16.3.1",
-    "ethers": "^6.9.2",
-    "itty-router": "^4.0.26"
+    "ethers": "^6.9.1",
+    "itty-router": "^4.0.25"
   }
 }

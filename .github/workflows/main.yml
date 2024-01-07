@@ -15,7 +15,10 @@ jobs:
         with:
           node-version: 20.x
           cache: 'npm'
-      - run: npm ci --omit=optional
+      # running without protection here because for some reason it rejects to install dependencies even if the lockfile contains an optional dependency for a different platform
+      # in our case it's fsevents. i tried many things with "--omit=optional" and overriding the dependency in package.json but it still fails
+      # todo: figure out why
+      - run: npm ci --force 
 
       - name: Lint
         run: npm run lint:check

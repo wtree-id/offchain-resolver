@@ -37,9 +37,9 @@
     "@wtree-id/offchain-resolver-contracts": "^0.2.1",
     "commander": "^11.1.0",
     "dotenv": "^16.3.1",
-    "ethers": "^6.9.2"
+    "ethers": "^6.9.1"
   },
-  "optionalDependencies": {
-    "fsevents": "^2.3.3"
+  "overrides": {
+    "fsevents": "../_EXCLUDED_"
   }
 }
