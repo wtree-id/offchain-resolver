@@ -1,6 +1,5 @@
 import { ethers } from 'ethers';
 import http from 'http';
-import ganache, { Server } from 'ganache';
 import { IExtendedResolver } from '@wtree-id/offchain-resolver-contracts/typechain-types';
 import { JSONDatabase } from '../src/json';
 import { makeServer } from '../src/server';
@@ -39,34 +38,28 @@ describe('End to end test', () => {
   let snapshot: number;
   let expressServer: http.Server;
   let provider: ethers.JsonRpcApiProvider;
-  let ganacheServer: Server;
 
   beforeAll(async () => {
-    ganacheServer = ganache.server({
-      logging: {
-        quiet: true,
-      },
-    });
-    await ganacheServer.listen(8545);
-
     const key = new ethers.SigningKey(TEST_PRIVATE_KEY);
-    provider = new ethers.JsonRpcProvider('http://127.0.0.1:8545', 1337);
+    provider = new ethers.JsonRpcProvider('http://127.0.0.1:8545', 31337);
     const signer = await provider.getSigner();
     const signerAddress = ethers.computeAddress(key.privateKey);
 
     resolver = (await deploySolidity(OffchainResolver_abi, signer, TEST_URL, [signerAddress])).connect(
       provider,
     ) as IExtendedResolver;
-    snapshot = await provider.send('evm_snapshot', []);
     const db = new JSONDatabase(TEST_DB, 300);
     const server = makeServer(key, db);
     const app = server.makeApp('/rpc/');
     expressServer = app.listen(8080);
   });
 
+  beforeEach(async () => {
+    snapshot = await provider.send('evm_snapshot', []);
+  });
+
   afterAll(async () => {
     expressServer.close();
-    ganacheServer.close();
   });
 
   afterEach(async () => {
