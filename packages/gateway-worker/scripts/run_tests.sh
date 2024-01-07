@@ -5,14 +5,7 @@ ganache > /dev/null & ganache_pid=$!
 sleep 10
 npm run test:run
 
-if [ ${wrangler_pid:-0} -gt 1 ]; then
-    echo "Killing wrangler with ${wrangler_pid}"
-    kill -9 $wrangler_pid
-fi
-
-if [ ${ganache_pid:-0} -gt 1 ]; then
-    echo "Killing ganache with ${ganache_pid}"
-    kill $ganache_pid
-fi
-
-sleep 5
+# the node and the local dev server end up running in different processes, i didn't find a way to kill them
+# wrangler has some issues with exiting the process, so i'm using pkill
+pkill -f wrangler
+pkill -f ganache
