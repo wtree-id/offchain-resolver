@@ -31,7 +31,7 @@ For the rest of this demo we will be using the standard test private key `0xac09
 First, install dependencies and build all packages:
 
 ```bash
-yarn && yarn build
+npm i && npm run build
 ```
 
 [Follow here](#running-locally) to run gateway worker locally. ( Skip this step if cloudflare worker url will be used as a remote gateway )

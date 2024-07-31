@@ -60,7 +60,6 @@ export interface HandlerDescription {
  * ```
  */
 export class Server {
-  /** @ignore */
   readonly handlers: { [selector: string]: Handler };
 
   /**
