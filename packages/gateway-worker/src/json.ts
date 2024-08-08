@@ -32,7 +32,7 @@ export class JSONDatabase implements Database {
   static async fromKVStore(store: any, ttl: number) {
     console.log('Loading data from KV store');
     const data = await store.get('test.eth.json');
-    console.log({ data });
+    console.log({ dataFromKVStore: data });
     return new JSONDatabase(JSON.parse(data), ttl);
   }
 

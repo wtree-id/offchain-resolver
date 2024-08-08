@@ -115,5 +115,8 @@ export function makeServer(signer: ethers.SigningKey, db: Database | Promise<Dat
 }
 
 export function makeRouter(signer: ethers.SigningKey, path: string, db: Database | Promise<Database>): RouterType {
-  return makeServer(signer, db).makeApp(path);
+  const server = makeServer(signer, db);
+  const app = server.makeApp(path);
+
+  return app;
 }

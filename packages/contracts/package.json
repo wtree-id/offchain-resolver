@@ -25,7 +25,7 @@
     "@types/cors": "2.8.17",
     "@types/express": "^4.17.21",
     "ethers": "^6.13.2",
-    "hardhat": "^2.22.7",
+    "hardhat": "^2.22.8",
     "hardhat-deploy": "^0.12.4",
     "tslib": "^2.6.3",
     "typescript": "^5.5.4"

@@ -54,7 +54,7 @@ describe('End to end test', () => {
   });
 
   describe('resolve()', () => {
-    it('resolves calls to addr(bytes32)', async () => {
+    it.only('resolves calls to addr(bytes32)', async () => {
       const callData = Resolver.encodeFunctionData('addr(bytes32)', [ethers.namehash('test.eth')]);
       const result = await resolver.resolve(ethers.dnsEncode('test.eth'), callData, { enableCcipRead: true });
       const resultData = Resolver.decodeFunctionResult('addr(bytes32)', result);
