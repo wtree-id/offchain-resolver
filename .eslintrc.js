@@ -9,6 +9,7 @@ module.exports = {
   root: true,
   rules: {
     'prefer-arrow-callback': 'error',
+    '@typescript-eslint/no-explicit-any': 'warn',
   },
   env: { node: true, es2020: true },
 };

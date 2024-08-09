@@ -7,7 +7,7 @@ import { abi as Resolver_abi } from '@ensdomains/ens-contracts/artifacts/contrac
 const ResolverInterface = new ethers.Interface(Resolver_abi);
 
 interface DatabaseResult {
-  result: any[];
+  result: string[];
   ttl: number;
 }
 
