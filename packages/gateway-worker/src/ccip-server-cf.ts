@@ -9,7 +9,10 @@ export interface RPCCall {
 
 export interface RPCResponse {
   status: number;
-  body: string;
+  body: {
+    data?: string;
+    message?: string;
+  };
 }
 
 export type HandlerFunc = (args: ethers.Result, req: RPCCall) => Promise<Array<any>> | Array<any>;
