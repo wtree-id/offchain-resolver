@@ -15,7 +15,9 @@ jobs:
         with:
           node-version: 20.x
           cache: 'npm'
-      - run: npm ci
+      - run: |
+          npm i -g bun # needed for some dependencies
+          npm ci
 
       - name: Lint
         run: npm run lint:check
