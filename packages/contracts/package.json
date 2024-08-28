@@ -20,14 +20,14 @@
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
-    "@ensdomains/ens-contracts": "^1.2.0",
+    "@ensdomains/ens-contracts": "^1.2.2",
     "@openzeppelin/contracts": "^5.0.2",
     "@types/cors": "2.8.17",
     "@types/express": "^4.17.21",
     "ethers": "^6.13.2",
-    "hardhat": "^2.22.8",
+    "hardhat": "^2.22.9",
     "hardhat-deploy": "^0.12.4",
-    "tslib": "^2.6.3",
+    "tslib": "^2.7.0",
     "typescript": "^5.5.4"
   },
   "dependencies": {},

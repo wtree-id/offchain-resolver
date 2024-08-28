@@ -21,9 +21,9 @@
   },
   "peerDependencies": {},
   "devDependencies": {
-    "husky": "^9.1.4",
+    "husky": "^9.1.5",
     "typescript": "^5.5.4",
-    "tslib": "^2.6.3"
+    "tslib": "^2.7.0"
   },
   "dependencies": {
     "commander": "^12.1.0",

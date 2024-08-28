@@ -46,7 +46,7 @@ describe('makeServer', () => {
       data: outerData,
     });
     // Decode the response from 'resolve'
-    const [result, validUntil, sigData] = IResolverService.decodeFunctionResult('resolve', body.data);
+    const [result, validUntil, sigData] = IResolverService.decodeFunctionResult('resolve', body.data || '0x');
     // Check the signature
     const messageHash = ethers.solidityPackedKeccak256(
       ['bytes', 'address', 'uint64', 'bytes32', 'bytes32'],
