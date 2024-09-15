@@ -25,10 +25,10 @@
     "@types/cors": "2.8.17",
     "@types/express": "^4.17.21",
     "ethers": "^6.13.2",
-    "hardhat": "^2.22.9",
+    "hardhat": "^2.22.10",
     "hardhat-deploy": "^0.12.4",
     "tslib": "^2.7.0",
-    "typescript": "^5.5.4"
+    "typescript": "^5.6.2"
   },
   "dependencies": {},
   "overrides": {
